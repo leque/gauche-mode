@@ -234,18 +234,6 @@
     (modify-syntax-entry ?\# "' 14bp" syntax)
     syntax))
 
-(defvar gauche-mode-font-lock-syntactic-keywords
-  '(
-    ;; regexp
-    ("#\\(/\\)\\(\\(\\\\\\\\\\)+\\|\\\\[^\\]\\|[^/\\]\\)*\\(/\\)"
-     (1 (7 . ?/))
-     (4 (7 . ?/)))
-    ;; R6RS inline hex escape
-    ("\\\\[xX][0-9a-zA-Z]+\\(;\\)" 1 "_")
-    ;; R6RS bytevector
-    ("#\\(vu8\\)(" 1 "'")
-    ))
-
 (defvar gauche-mode-map
   (let ((map (make-sparse-keymap)))
     (define-key map [(control ?c) (control ?d)] #'gauche-mode-toggle-debug-print)
@@ -270,10 +258,6 @@
           t
           (("+-*/.<>=!?$%_&~^:" . "w"))
           beginning-of-defun
-          (font-lock-syntactic-keywords
-           . gauche-mode-font-lock-syntactic-keywords)
-          (font-lock-syntactic-face-function
-           . scheme-font-lock-syntactic-face-function)
           (font-lock-mark-block-function . mark-defun)
           (parse-sexp-lookup-properties . t)
           ))
