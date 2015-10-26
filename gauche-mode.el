@@ -1,6 +1,14 @@
 ;;; -*- coding: utf-8 -*-
-;;;
-;;; Copyright (c) 2007-2010 OOHASHI Daichi <leque@katch.ne.jp>,
+;;; gauche-mode.el --- A mode for editing Gauche Scheme codes in Emacs
+
+;; Copyright (c) 2007-2015 OOHASHI Daichi
+
+;; Author: OOHASHI Daichi <dico.leque.comicron@gmail.com>
+;; Keywords: scheme, gauche
+;; URL: https://github.com/leque/gauche-mode
+;; Version: 0.1.0
+
+;;; Copyright (c) 2007-2015 OOHASHI Daichi <dico.leque.comicron@gmail.com>,
 ;;; All rights reserved.
 ;;;
 ;;; Redistribution and use in source and binary forms, with or without
