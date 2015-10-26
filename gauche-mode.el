@@ -51,6 +51,13 @@
   :prefix "gauche-mode-"
   :group 'applications)
 
+(defcustom gauche-mode-info-language 'en
+  "language of the reference manual to be shown"
+  :type '(choice
+          (const "English" en)
+          (const "Japanese" ja))
+  :group 'gauche-mode)
+
 (defcustom gauche-mode-profiler-max-rows "#f"
   "max number of rows of profiler output"
   :type '(choice integer
@@ -382,42 +389,49 @@ but use macroexpand-1 instead."
      (t
       (insert "#;")))))
 
-;;; info
-;; ;; Manual (English)
-;; (eval-after-load "info-look"
-;;   '(info-lookup-add-help
-;;     :topic 'symbol
-;;     :mode  'gauche-mode
-;;     :regexp "[^()'\" \t\n]+"
-;;     :ignore-case nil
-;;     :doc-spec '(("(gauche-refe.info)Function and Syntax Index" nil
-;;                  "^[ \t]+-- [^:]+:[ \t]*" nil)
-;;                 ("(gauche-refe.info)Module Index" nil
-;;                  "^[ \t]+-- [^:]+:[ \t]*" nil)
-;;                 ("(gauche-refe.info)Class Index" nil
-;;                  "^[ \t]+-- [^:]+:[ \t]*" nil)
-;;                 ("(gauche-refe.info)Variable Index" nil
-;;                  "^[ \t]+-- [^:]+:[ \t]*" nil))
-;;     :parse-rule  nil
-;;     :other-modes nil))
+;;; info-look
+(defun gauche-mode-setup-info-look ()
+  "setup info-lookup based on `gauche-mode-info-language'"
+  (interactive)
+  (eval-after-load "info-look"
+    (case gauche-mode-info-language
+      ((en)
+       '(info-lookup-add-help
+         :topic 'symbol
+         :mode  'gauche-mode
+         :regexp "[^()'\" \t\n]+"
+         :ignore-case nil
+         :doc-spec '(("(gauche-refe.info)Function and Syntax Index" nil
+                      "^[ \t]+-- [^:]+:[ \t]*" nil)
+                     ("(gauche-refe.info)Module Index" nil
+                      "^[ \t]+-- [^:]+:[ \t]*" nil)
+                     ("(gauche-refe.info)Class Index" nil
+                      "^[ \t]+-- [^:]+:[ \t]*" nil)
+                     ("(gauche-refe.info)Variable Index" nil
+                      "^[ \t]+-- [^:]+:[ \t]*" nil))
+         :parse-rule  nil
+         :other-modes nil))
+      ((ja)
+       '(info-lookup-add-help
+         :topic 'symbol
+         :mode  'gauche-mode
+         :regexp "[^()'\" \t\n]+"
+         :ignore-case nil
+         :doc-spec '(("(gauche-refj.info)Index - 手続きと構文索引" nil
+                      "^[ \t]+-+ [^:]+:[ \t]*" nil)
+                     ("(gauche-refj.info)Index - モジュール索引" nil
+                      "^[ \t]+-+ [^:]+:[ \t]*" nil)
+                     ("(gauche-refj.info)Index - クラス索引" nil
+                      "^[ \t]+-+ [^:]+:[ \t]*" nil)
+                     ("(gauche-refj.info)Index - 変数索引" nil
+                      "^[ \t]+-+ [^:]+:[ \t]*" nil))
+         :parse-rule  nil
+         :other-modes nil))
+      (t
+       (error "invalid gauche-mode-info-language: %s"
+              gauche-mode-info-language)))))
 
-;; Manual (Japanese)
-(eval-after-load "info-look"
-  '(info-lookup-add-help
-    :topic 'symbol
-    :mode  'gauche-mode
-    :regexp "[^()'\" \t\n]+"
-    :ignore-case nil
-    :doc-spec '(("(gauche-refj.info)Index - 手続きと構文索引" nil
-                 "^[ \t]+-+ [^:]+:[ \t]*" nil)
-                ("(gauche-refj.info)Index - モジュール索引"   nil
-                 "^[ \t]+-+ [^:]+:[ \t]*" nil)
-                ("(gauche-refj.info)Index - クラス索引"      nil
-                 "^[ \t]+-+ [^:]+:[ \t]*" nil)
-                ("(gauche-refj.info)Index - 変数索引"        nil
-                 "^[ \t]+-+ [^:]+:[ \t]*" nil))
-    :parse-rule  nil
-    :other-modes nil))
+(gauche-mode-setup-info-look)
 
 (defun gauche-mode-info-candidates (_pat)
   (mapcar #'car (info-lookup->completions 'symbol 'gauche-mode)))
