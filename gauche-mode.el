@@ -36,9 +36,13 @@
 (defcustom gauche-mode-info-language 'en
   "language of the reference manual to be shown"
   :type '(choice
-          (const "English" en)
-          (const "Japanese" ja))
-  :group 'gauche-mode)
+          (const :tag "English" en)
+          (const :tag "Japanese" ja))
+  :group 'gauche-mode
+  :set #'(lambda (symbol value)
+           (set-default symbol value)
+           (when (fboundp 'gauche-mode-setup-info-look)
+             (gauche-mode-setup-info-look))))
 
 (defcustom gauche-mode-profiler-max-rows "#f"
   "max number of rows of profiler output"
