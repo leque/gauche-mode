@@ -231,6 +231,28 @@
     (modify-syntax-entry ?\# "' 14bp" syntax)
     syntax))
 
+(defun gauche-syntax-propertize (beg end)
+  (goto-char beg)
+  (scheme-syntax-propertize-sexp-comment (point) end)
+  (funcall
+   (syntax-propertize-rules
+    ("\\(#\\);" (1 (prog1 "< cn"
+                     (scheme-syntax-propertize-sexp-comment (point) end))))
+    ("#\\(/\\)\\(\\(\\\\\\\\\\)+\\|\\\\[^\\]\\|[^/\\]\\)*\\(/\\)"
+     (1 "\"")
+     (4 "\""))
+    ;; R6RS inline hex escape
+    ("\\\\[xX][0-9a-zA-Z]+\\(;\\)"
+     (1 "_"))
+    ;; R6RS bytevectors
+    ("#\\(vu8\\)("
+     (1 "'"))
+    ;; R7RS bytevectors + SRFI-4 Homogeneous numeric vector datatypes
+    ("#\\([su]\\(8\\|16\\|32\\|64\\)\\|f\\(16\\|32\\|64\\)\\)("
+     (1 "'"))
+    )
+   (point) end))
+
 (defvar gauche-mode-map
   (let ((map (make-sparse-keymap)))
     (define-key map [(control ?c) (control ?d)] #'gauche-mode-toggle-debug-print)
@@ -258,6 +280,7 @@
           (font-lock-mark-block-function . mark-defun)
           (parse-sexp-lookup-properties . t)
           ))
+  (setq-local syntax-propertize-function #'gauche-syntax-propertize)
   )
 
 (defun gauche-mode-last-sexp ()
