@@ -438,7 +438,7 @@ but use macroexpand-1 instead."
 
 (gauche-mode-setup-info-look)
 
-(defun gauche-mode-info-candidates (_pat)
+(defun gauche-mode-info-candidates (&optinal _pat)
   (mapcar #'car (info-lookup->completions 'symbol 'gauche-mode)))
 
 (provide 'gauche-mode)
