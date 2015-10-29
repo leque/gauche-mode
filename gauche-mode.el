@@ -24,9 +24,7 @@
 
 ;;; Code:
 
-(eval-when-compile
-  (require 'cl))
-
+(require 'cl-lib)
 (require 'scheme)
 (require 'cmuscheme)
 (require 'info-look)
@@ -95,8 +93,8 @@
     (^ 1 t)
     (^_ 0 t)
     ;; ^a ... ^z
-    ,@(loop for c from ?a to ?z
-            collect `(,(intern (format "^%c" c)) 0 t))
+    ,@(cl-loop for c from ?a to ?z
+               collect `(,(intern (format "^%c" c)) 0 t))
     (and-let* 1 t)
     (begin0 0 t)
     (call-with-builder 1 nil)
@@ -209,9 +207,10 @@
   (append
    `((,(format "(%s\\>"
                (regexp-opt
-                (loop for (name indent highlight?) in gauche-keywords
-                      when indent do (put name 'scheme-indent-function indent)
-                      when highlight? collect (symbol-name name))
+                (cl-loop
+                 for (name indent highlight?) in gauche-keywords
+                 when indent do (put name 'scheme-indent-function indent)
+                 when highlight? collect (symbol-name name))
                 t))
       1 font-lock-keyword-face)
      (,(format "(%s\\>"
