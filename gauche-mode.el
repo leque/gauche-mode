@@ -1,10 +1,9 @@
-;;; -*- coding: utf-8 -*-
-;;; gauche-mode.el --- A mode for editing Gauche Scheme codes in Emacs
+;;; gauche-mode.el --- A mode for editing Gauche Scheme codes -*- coding: utf-8; lexical-binding: t; -*-
 
 ;; Copyright (c) 2007-2015 OOHASHI Daichi
 
 ;; Author: OOHASHI Daichi <dico.leque.comicron@gmail.com>
-;; Keywords: scheme, gauche
+;; Keywords: languages, lisp, gauche
 ;; URL: https://github.com/leque/gauche-mode
 ;; Version: 0.1.0
 
@@ -20,6 +19,10 @@
 
 ;; You should have received a copy of the GNU General Public License
 ;; along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+;;; Commentary:
+
+;;; Code:
 
 (eval-when-compile
   (require 'cl))
@@ -446,3 +449,4 @@ but use macroexpand-1 instead."
   (mapcar #'car (info-lookup->completions 'symbol 'gauche-mode)))
 
 (provide 'gauche-mode)
+;;; gauche-mode.el ends here
