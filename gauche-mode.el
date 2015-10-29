@@ -271,6 +271,7 @@
     (define-key map [(control ?c) ?\;] #'gauche-mode-toggle-datum-comment)
     map))
 
+;;;###autoload
 (define-derived-mode gauche-mode scheme-mode
   "Gauche" "Major mode for Gauche."
   (use-local-map gauche-mode-map)
