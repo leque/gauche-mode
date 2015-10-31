@@ -448,5 +448,14 @@ but use macroexpand-1 instead."
 (defun gauche-mode-info-candidates (&optional _pat)
   (mapcar #'car (info-lookup->completions 'symbol 'gauche-mode)))
 
+;;;###autoload
+(add-to-list 'auto-mode-alist
+             (cons "\\.\\(sld\\|sci\\|scm\\)\\'"
+                   'gauche-mode))
+
+;;;###autoload
+(add-to-list 'interpreter-mode-alist
+             (cons "gosh" 'gauche-mode))
+
 (provide 'gauche-mode)
 ;;; gauche-mode.el ends here
