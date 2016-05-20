@@ -28,6 +28,7 @@
 (require 'scheme)
 (require 'cmuscheme)
 (require 'info-look)
+(require 'rx)
 
 (defgroup gauche-mode nil
   "A mode for editing Gauche Scheme codes in Emacs"
@@ -324,27 +325,32 @@
 
 (defvar gauche-mode-font-lock-keywords
   (append
-   `((,(format "(%s\\>"
-               (regexp-opt
-                (cl-loop
-                 for (name indent highlight?) in gauche-keywords
-                 when indent do (put name 'scheme-indent-function indent)
-                 when highlight? collect (symbol-name name))
-                t))
+   `((,(rx-to-string
+        `(seq "("
+              (submatch-n
+               1
+               (or ,@(cl-loop
+                      for (name indent highlight?) in gauche-keywords
+                      when indent do (put name 'scheme-indent-function indent)
+                      when highlight? collect (symbol-name name))))
+              symbol-end))
       1 font-lock-keyword-face)
-     (,(format "(%s\\>"
-               (regexp-opt
-                '("error" "errorf" "syntax-error" "syntax-errorf") t))
+     (,(rx "("
+           (submatch-n
+            1
+            (or "error" "errorf" "syntax-error" "syntax-errorf"))
+           symbol-end)
       1 font-lock-warning-face)
-     (,(format "\\<%s\\>"
-               (regexp-opt
-                '("<>" "<...>") t))
+     (,(rx symbol-start
+           (or "<>" "<...>")
+           symbol-end)
       0 font-lock-builtin-face t)
-     ("#!\\w+"
+     (,(rx "#!" (1+ word))
       0 font-lock-comment-face)
-     ("\\`#!.*"
+     (,(rx buffer-start "#!" (0+ any))
       0 font-lock-preprocessor-face t)
-     ("\\(#\\?=\\|#[0-9]+#\\|#[0-9]+=\\)"
+     (,(rx (or "#?="
+               (seq "#" (1+ digit) (or "#" "="))))
       0 font-lock-preprocessor-face)
      )
    scheme-font-lock-keywords-1
@@ -361,19 +367,30 @@
   (scheme-syntax-propertize-sexp-comment (point) end)
   (funcall
    (syntax-propertize-rules
-    ("\\(#\\);" (1 (prog1 "< cn"
-                     (scheme-syntax-propertize-sexp-comment (point) end))))
-    ("#\\(/\\)\\(\\(\\\\\\\\\\)+\\|\\\\[^\\]\\|[^/\\]\\)*\\(/\\)"
+    ;; sexp comments
+    ((rx (submatch "#") ";")
+     (1 (prog1 "< cn"
+          (scheme-syntax-propertize-sexp-comment (point) end))))
+    ;; regexps
+    ((rx "#"
+         (submatch-n 1 "/")
+         (0+ (or (seq "\\" any)
+                 (not (any "/\\"))
+                 ))
+         (submatch-n 2 "/"))
      (1 "\"")
-     (4 "\""))
+     (2 "\""))
     ;; R6RS inline hex escape
-    ("\\\\[xX][0-9a-zA-Z]+\\(;\\)"
+    ((rx "\\" (any "Xx") (1+ hex-digit) (submatch ";"))
      (1 "_"))
     ;; R6RS bytevectors
-    ("#\\(vu8\\)("
+    ((rx "#" (submatch "vu8") "(")
      (1 "'"))
     ;; R7RS bytevectors + SRFI-4 Homogeneous numeric vector datatypes
-    ("#\\([su]\\(8\\|16\\|32\\|64\\)\\|f\\(16\\|32\\|64\\)\\)("
+    ((rx "#"
+         (or (seq (any "f") (or "16" "32" "64"))
+             (seq (any "su") (or "8" "16" "32" "64")))
+         "(")
      (1 "'"))
     )
    (point) end))
@@ -419,15 +436,18 @@
   (interactive)
   (let ((word (thing-at-point 'sexp)))
     (save-excursion
-      (unless (re-search-backward "^\\s *(export\\Sw+" nil t)
+      (unless (re-search-backward (rx "(export" symbol-end)
+                                  nil t)
         (error "No export clause found."))
       (let ((bp (match-beginning 0)))
-        (unless (re-search-forward "\\s)" nil t)
+        (unless (re-search-forward (rx ")")
+                                   nil t)
           (error "Unclosed export clause."))
         (let ((ep (match-beginning 0)))
           (goto-char bp)
-          (if (re-search-forward
-               (concat "\\s " (regexp-quote word) "[ \t\n\f\v\)]") (1+ ep) t)
+          (if (re-search-forward (rx-to-string
+                                  `(seq symbol-start ,word symbol-end))
+                                 (1+ ep) t)
               (message "%s is already exported." word)
             (goto-char ep)
             (insert " " word)
