@@ -1,6 +1,6 @@
-# `gauche-mode.el`
+# gauche-mode.el
 
-An Emacs major mode for Gauche Scheme
+An Emacs major mode for [Gauche Scheme Interpreter](http://practical-scheme.net/gauche/).
 
 ## Requirements
 
@@ -13,6 +13,8 @@ An Emacs major mode for Gauche Scheme
 ## Features
 
 * syntax highlighting for regexps
+* info-look for the reference manual
+* indentation for Gauche-specific syntaxes
 
 ## Configuration
 
@@ -21,7 +23,7 @@ An Emacs major mode for Gauche Scheme
 ```
 
 ## Keybindings
-### `gauche-mode-toggle-debug-print` `C-c C-d`
+### gauche-mode-toggle-debug-print `C-c C-d`
 
 ```
 (list |(fact 10))
@@ -33,7 +35,7 @@ An Emacs major mode for Gauche Scheme
 (list (fact 10))
 ```
 
-### `gauche-mode-toggle-datum-comment` `C-c ;`
+### gauche-mode-toggle-datum-comment `C-c ;`
 
 ```
 (list |(foo 42) (bar))
@@ -45,7 +47,7 @@ An Emacs major mode for Gauche Scheme
 (list (foo 42) (bar))
 ```
 
-### `gauche-mode-export-current-symbol` `C-c M-x`
+### gauche-mode-export-current-symbol `C-c M-x`
 
 ```
 (define-module foo.bar
@@ -59,7 +61,7 @@ An Emacs major mode for Gauche Scheme
 (define |baz 42)
 ```
 
-### `gauche-mode-macroexpand` `C-c M-m`
+### gauche-mode-macroexpand `C-c M-m`
 
 ```
 (llist* 1 2 3)
@@ -67,7 +69,7 @@ An Emacs major mode for Gauche Scheme
 ;; -| (cons 1 (lcons* 2 3))
 ```
 
-### `gauche-mode-macroexpand1` `C-c C-m`
+### gauche-mode-macroexpand-1 `C-c C-m`
 
 ```
 (llist* 1 2 3)
