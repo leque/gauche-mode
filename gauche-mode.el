@@ -69,7 +69,7 @@
 (defun gauche-mode-switch-define-record-type ()
   (put 'define-record-type
        'scheme-indent-function
-       (case gauche-mode-define-record-type-syntax
+       (cl-case gauche-mode-define-record-type-syntax
          ((srfi) 3)
          ((r6rs) 1)
          (t (error "Unknown syntax for define-record-type: %s"
@@ -525,7 +525,7 @@ but use macroexpand-1 instead."
   "setup info-lookup based on `gauche-mode-info-language'"
   (interactive)
   (eval-after-load "info-look"
-    (case gauche-mode-info-language
+    (cl-case gauche-mode-info-language
       ((en)
        '(info-lookup-add-help
          :topic 'symbol
