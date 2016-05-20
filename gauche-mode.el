@@ -380,13 +380,13 @@
 
 (defvar gauche-mode-map
   (let ((map (make-sparse-keymap)))
-    (define-key map [(control ?c) (control ?d)] #'gauche-mode-toggle-debug-print)
-    (define-key map [(control ?c) (meta ?x)] #'gauche-mode-export-current-symbol)
-    (define-key map [(control ?c) (meta ?d)] #'gauche-mode-disassemble)
-    (define-key map [(control ?c) (meta ?m)] #'gauche-mode-macroexpand)
-    (define-key map [(control ?c) (control ?m)] #'gauche-mode-macroexpand-1)
-    (define-key map [(control ?c) (control ?p)] #'gauche-mode-profile-last-sexp)
-    (define-key map [(control ?c) ?\;] #'gauche-mode-toggle-datum-comment)
+    (define-key map (kbd "C-c C-d") #'gauche-mode-toggle-debug-print)
+    (define-key map (kbd "C-c M-x") #'gauche-mode-export-current-symbol)
+    (define-key map (kbd "C-c M-d") #'gauche-mode-disassemble)
+    (define-key map (kbd "C-c M-m") #'gauche-mode-macroexpand)
+    (define-key map (kbd "C-c C-m") #'gauche-mode-macroexpand-1)
+    (define-key map (kbd "C-c C-p") #'gauche-mode-profile-last-sexp)
+    (define-key map (kbd "C-c   ;") #'gauche-mode-toggle-datum-comment)
     map))
 
 ;;;###autoload
