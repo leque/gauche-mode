@@ -493,52 +493,27 @@ but use macroexpand-1 instead."
    (scheme-proc)
    (format "(begin (newline) (disasm %s))\n" exp)))
 
+(defun gauche-mode--toggle-symbol (sym)
+  (let* ((p (point))
+         (len (length sym))
+         (i (cl-loop for i from 0 downto (- len)
+                     when (cl-loop for j from 0 below len
+                                   always (eql (aref sym j)
+                                               (char-after (+ p i j))))
+                     return i)))
+    (if i
+        (delete-region (+ p i) (+ p i len))
+      (insert sym))))
+
 (defun gauche-mode-toggle-debug-print ()
+  "toggle #?= (debug-print)"
   (interactive)
-  (let ((p (point))
-        (c (char-after))
-        (d (char-before)))
-    (cond
-     ((null c) t)                       ; do nothing
-     ((and d
-           (char-equal d ?=)
-           (char-equal (char-before (- p 1)) ??)
-           (char-equal (char-before (- p 2)) ?#))
-      (delete-region (- p 3) p))
-     ((and (char-equal c ?#)
-           (char-equal (char-after (+ p 1)) ??)
-           (char-equal (char-after (+ p 2)) ?=))
-      (delete-region p (+ p 3)))
-     ((and (char-equal c ??)
-           (char-equal (char-after (- p 1)) ?#)
-           (char-equal (char-after (+ p 1)) ?=))
-      (delete-region (- p 1) (+ p 2)))
-     ((and (char-equal c ?=)
-           (char-equal (char-after (- p 1)) ??)
-           (char-equal (char-after (- p 2)) ?#))
-      (delete-region (- p 2) (+ p 1)))
-     (t
-      (insert "#?=")))))
+  (gauche-mode--toggle-symbol "#?="))
 
 (defun gauche-mode-toggle-datum-comment ()
+  "toggle #; (datum comment)"
   (interactive)
-  (let ((p (point))
-        (b (char-before))
-        (c (char-after)))
-    (cond
-     ((null c) t)                       ; do nothing
-     ((and b
-           (char-equal b ?\;)
-           (char-equal (char-before (- p 1)) ?#))
-      (delete-region (- p 2) p))
-     ((and (char-equal b ?#)
-           (char-equal c ?\;))
-      (delete-region (- p 1) (+ p 1)))
-     ((and (char-equal c ?#)
-           (char-equal (char-after (+ p 1)) ?\;))
-      (delete-region p (+ p 2)))
-     (t
-      (insert "#;")))))
+  (gauche-mode--toggle-symbol "#;"))
 
 ;;; info-look
 (defun gauche-mode-setup-info-look ()
