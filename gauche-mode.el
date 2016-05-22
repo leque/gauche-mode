@@ -446,26 +446,44 @@
 
 (defun gauche-mode-export-current-symbol ()
   (interactive)
-  (let ((word (thing-at-point 'sexp)))
+  (let ((symbol (thing-at-point 'symbol t)))
+    (unless symbol
+      (error "no symbol at point"))
     (save-excursion
       (save-match-data
         (unless (re-search-backward (rx "(export" symbol-end)
                                     nil t)
           (error "No export clause found."))
-        (let ((bp (match-beginning 0)))
-          (unless (re-search-forward (rx ")")
-                                     nil t)
+        (let* ((bp (point))
+               (ep (ignore-errors
+                     (save-excursion
+                       (forward-sexp)
+                       (point)))))
+          (unless ep
             (error "Unclosed export clause."))
-          (let ((ep (match-beginning 0)))
-            (goto-char bp)
-            (if (re-search-forward (rx-to-string
-                                    `(seq symbol-start ,word symbol-end))
-                                   (1+ ep) t)
-                (message "%s is already exported." word)
-              (goto-char ep)
-              (insert " " word)
-              (lisp-indent-line)
-              (message "Exported %s." word))))))))
+          (down-list)
+          (cl-block nil
+            (ignore-errors
+              (while (< (point) ep)
+                (forward-sexp)
+                (skip-syntax-forward " ")
+                (let ((thing
+                       (cond ((looking-at (rx "(rename" symbol-end))
+                              (ignore-errors
+                                (save-excursion
+                                  (down-list)
+                                  (forward-sexp 2)
+                                  (skip-syntax-forward " ")
+                                  (thing-at-point 'symbol))))
+                             (t
+                              (thing-at-point 'symbol)))))
+                  (when (equal symbol thing)
+                    (message "%s is already exported." symbol)
+                    (cl-return nil)))))
+            (goto-char (1- ep))
+            (insert " " symbol)
+            (lisp-indent-line)
+            (message "Exported %s." symbol)))))))
 
 (defun gauche-mode-macroexpand (arg &optional n)
   "Expands the last macro and print it on *scheme* buffer.
