@@ -46,7 +46,10 @@
 
 (defun gauche-paredit-in-regexp-p ()
   (and (paredit-in-string-p)
-       (= ?\/ (char-after (car (paredit-string-start+end-points))))))
+       (let ((start (car (paredit-string-start+end-points))))
+         (string= "#/"
+                  (buffer-substring-no-properties start
+                                                  (+ 2 start))))))
 
 (defun gauche-paredit-slash (&optional n)
   "After `#`, insert pair of slashes.
@@ -56,9 +59,20 @@ Otherwise, insert a literal slash.
 "
   (interactive "P")
   (cond ((gauche-paredit-in-regexp-p)
-         (if (= (point) (cdr (paredit-string-start+end-points)))
-             (forward-char)
-           (insert ?\\ ?\/)))
+         (let* ((pair (paredit-string-start+end-points))
+                (start (car pair))
+                (end (cdr pair))
+                (pos (point)))
+           (if (or (= pos
+                      (if (= ?\/ (char-after end))
+                          end
+                        (1- end)))
+                   (= pos
+                      (1+ start)))
+               (forward-char)
+             (if (= pos end)
+                 (insert ?\/)
+               (insert ?\\ ?\/)))))
         ((paredit-in-comment-p)
          (insert ?\/))
         ((not (paredit-in-char-p))
