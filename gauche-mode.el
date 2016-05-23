@@ -390,8 +390,9 @@
      (1 "'"))
     ;; R7RS bytevectors + SRFI-4 Homogeneous numeric vector datatypes
     ((rx "#"
-         (or (seq (any "f") (or "16" "32" "64"))
-             (seq (any "su") (or "8" "16" "32" "64")))
+         (submatch
+          (or (seq (any "f") (or "16" "32" "64"))
+              (seq (any "su") (or "8" "16" "32" "64"))))
          "(")
      (1 "'"))
     )
