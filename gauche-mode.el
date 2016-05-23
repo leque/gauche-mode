@@ -372,14 +372,16 @@
      (1 (prog1 "< cn"
           (scheme-syntax-propertize-sexp-comment (point) end))))
     ;; regexps
-    ((rx "#"
-         (submatch-n 1 "/")
+    ((rx (submatch "#")
+         "/"
          (0+ (or (seq "\\" any)
                  (not (any "/\\"))
                  ))
-         (submatch-n 2 "/"))
-     (1 "\"")
-     (2 "\""))
+         (or (seq "/" (submatch "i"))
+             (submatch "/")))
+     (1 "| cn")
+     (2 "|")
+     (3 "|"))
     ;; R6RS inline hex escape
     ((rx "\\" (any "Xx") (1+ hex-digit) (submatch ";"))
      (1 "_"))
