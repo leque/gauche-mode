@@ -30,12 +30,12 @@
 (defvar gauche-paredit-paren-prefix-pat
   (rx
    (or
-    (seq "#" (+ digit) "=")                     ; R7RS datum labels
-    (seq "#" (in "su") (or "8" "16" "32" "64")) ; R7RS bytevectors + SRFI-34
-    (seq "#f" (or "16" "32" "64"))              ; SRFI-34
-    "#vu8"                                      ; R6RS bytevectors
-    "(^"                                        ; (^(x y) ...)
-    "#?="                                       ; debug-print
+    (seq "#" (+ digit) "=")                      ; R7RS datum labels
+    (seq "#" (any "su") (or "8" "16" "32" "64")) ; R7RS bytevectors + SRFI-4
+    (seq "#" (any "f") (or "16" "32" "64"))      ; SRFI-4 + Gauche's extension
+    "#vu8"                                       ; R6RS bytevectors
+    "(^"                                         ; (^(x y) ...)
+    "#?="                                        ; debug-print
     )))
 
 (defun gauche-paredit-space-for-delimiter-p (endp delimiter)
