@@ -382,6 +382,15 @@
      (1 "| cn")
      (2 "|")
      (3 "|"))
+    ;; SRFI-14 Character-set
+    ((rx (submatch "#")
+         "["
+         (0+ (or (seq "\\" any)
+                 (seq "[:" (0+ lower) ":]")
+                 (not (any "[]\\"))))
+         (submatch "]"))
+     (1 "| cn")
+     (2 "|"))
     ;; R6RS inline hex escape
     ((rx "\\" (any "Xx") (1+ hex-digit) (submatch ";"))
      (1 "_"))
