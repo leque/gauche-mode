@@ -63,16 +63,18 @@ Otherwise, insert a literal slash.
                 (start (car pair))
                 (end (cdr pair))
                 (pos (point)))
-           (if (or (= pos
-                      (if (= ?\/ (char-after end))
-                          end
-                        (1- end)))
-                   (= pos
-                      (1+ start)))
-               (forward-char)
-             (if (= pos end)
-                 (insert ?\/)
-               (insert ?\\ ?\/)))))
+           (cond
+            ;; before an open/close slash
+            ((or (= pos (1+ start))
+                 (= pos (if (= ?\/ (char-after end))
+                            end
+                          (1- end))))
+             (forward-char))
+            ;; before `i' flag
+            ((= pos end)
+             (insert ?\/))
+            (t
+             (insert ?\\ ?\/)))))
         ((paredit-in-comment-p)
          (insert ?\/))
         ((not (paredit-in-char-p))
