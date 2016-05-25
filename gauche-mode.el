@@ -358,7 +358,6 @@
 
 (defvar gauche-mode-syntax-table
   (let ((syntax (copy-syntax-table scheme-mode-syntax-table)))
-    (modify-syntax-entry ?\| "  23b" syntax)
     (modify-syntax-entry ?\# "' 14bp" syntax)
     syntax))
 
@@ -407,6 +406,17 @@
     )
    (point) end))
 
+(defvar gauche-font-lock-syntactic-face-function
+  (lambda (state)
+    ;; (generic) string or (generic) comment
+    (if (nth 3 state)
+        ;; (generic) string
+        (if (eq ?| (char-after (nth 8 state)))
+            ;; escaped symbol
+            nil
+          font-lock-string-face)
+      font-lock-comment-face)))
+
 (defvar gauche-mode-map
   (let ((map (make-sparse-keymap)))
     (define-key map (kbd "C-c C-d") #'gauche-mode-toggle-debug-print)
@@ -434,6 +444,8 @@
           beginning-of-defun
           (font-lock-mark-block-function . mark-defun)
           (parse-sexp-lookup-properties . t)
+          (font-lock-syntactic-face-function
+           . ,gauche-font-lock-syntactic-face-function)
           ))
   (setq-local syntax-propertize-function #'gauche-syntax-propertize)
   )
