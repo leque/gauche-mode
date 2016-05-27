@@ -341,6 +341,10 @@
             (or "error" "errorf" "syntax-error" "syntax-errorf"))
            symbol-end)
       1 font-lock-warning-face)
+     (,(rx "#\\"
+           (or (1+ word)
+               anything))
+      0 font-lock-string-face)
      (,(rx symbol-start
            (or "<>" "<...>")
            symbol-end)
