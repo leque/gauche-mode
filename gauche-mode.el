@@ -408,16 +408,15 @@
     )
    (point) end))
 
-(defvar gauche-font-lock-syntactic-face-function
-  (lambda (state)
-    ;; (generic) string or (generic) comment
-    (if (nth 3 state)
-        ;; (generic) string
-        (if (eq ?| (char-after (nth 8 state)))
-            ;; escaped symbol
-            nil
-          font-lock-string-face)
-      font-lock-comment-face)))
+(defun gauche-font-lock-syntactic-face-function (state)
+  ;; (generic) string or (generic) comment
+  (if (nth 3 state)
+      ;; (generic) string
+      (if (eq ?| (char-after (nth 8 state)))
+          ;; escaped symbol
+          nil
+        font-lock-string-face)
+    font-lock-comment-face))
 
 (defvar gauche-mode-map
   (let ((map (make-sparse-keymap)))
@@ -447,7 +446,7 @@
           (font-lock-mark-block-function . mark-defun)
           (parse-sexp-lookup-properties . t)
           (font-lock-syntactic-face-function
-           . ,gauche-font-lock-syntactic-face-function)
+           . gauche-font-lock-syntactic-face-function)
           ))
   (setq-local syntax-propertize-function #'gauche-syntax-propertize)
   )
