@@ -458,9 +458,12 @@
            (sp (progn (backward-sexp) (point))))
       (buffer-substring sp ep))))
 
-(defun gauche-mode-export-current-symbol ()
-  (interactive)
-  (let ((symbol (thing-at-point 'symbol t)))
+(defun gauche-mode-export-current-symbol (renamep)
+  (interactive "P")
+  (let* ((symbol (thing-at-point 'symbol t))
+         (exported-name (if renamep
+                            (read-string "export-as: ")
+                          symbol)))
     (unless symbol
       (error "no symbol at point"))
     (save-excursion
@@ -468,11 +471,10 @@
         (unless (re-search-backward (rx "(export" symbol-end)
                                     nil t)
           (error "No export clause found."))
-        (let* ((bp (point))
-               (ep (ignore-errors
-                     (save-excursion
-                       (forward-sexp)
-                       (point)))))
+        (let ((ep (ignore-errors
+                    (save-excursion
+                      (forward-sexp)
+                      (point)))))
           (unless ep
             (error "Unclosed export clause."))
           (down-list)
@@ -491,11 +493,13 @@
                                   (thing-at-point 'symbol))))
                              (t
                               (thing-at-point 'symbol)))))
-                  (when (equal symbol thing)
+                  (when (equal exported-name thing)
                     (message "%s is already exported." symbol)
                     (cl-return nil)))))
             (goto-char (1- ep))
-            (insert " " symbol)
+            (if renamep
+                (insert " (rename " symbol " " exported-name ")")
+              (insert " " symbol))
             (lisp-indent-line)
             (message "Exported %s." symbol)))))))
 
