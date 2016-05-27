@@ -440,7 +440,7 @@
   (setq font-lock-defaults
         `(,gauche-mode-font-lock-keywords
           nil
-          t
+          nil
           (("+-*/.<>=!?$%_&~^:" . "w"))
           beginning-of-defun
           (font-lock-mark-block-function . mark-defun)
