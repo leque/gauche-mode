@@ -347,6 +347,13 @@
            (or "<>" "<...>")
            symbol-end)
       0 font-lock-builtin-face t)
+     (,(rx "#"
+           (or (seq (any "Tt")
+                    (opt (any "Rr") (any "Uu") (any "Ee")))
+               (seq (any "Ff")
+                    (opt (any "Aa") (any "Ll") (any "Ss") (any "Ee"))))
+           symbol-end)
+      0 font-lock-constant-face)
      (,(rx "#!" (1+ word))
       0 font-lock-comment-face)
      (,(rx buffer-start "#!" (0+ any))
