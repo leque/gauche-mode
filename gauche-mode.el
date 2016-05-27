@@ -568,45 +568,42 @@ but use macroexpand-1 instead."
 (defun gauche-mode-setup-info-look ()
   "setup info-lookup based on `gauche-mode-info-language'"
   (interactive)
-  (eval-after-load "info-look"
-    (cl-case gauche-mode-info-language
-      ((en)
-       '(info-lookup-add-help
-         :topic 'symbol
-         :mode  'gauche-mode
-         :regexp "[^()'\" \t\n]+"
-         :ignore-case nil
-         :doc-spec '(("(gauche-refe.info)Function and Syntax Index" nil
-                      "^[ \t]+-- [^:]+:[ \t]*" nil)
-                     ("(gauche-refe.info)Module Index" nil
-                      "^[ \t]+-- [^:]+:[ \t]*" nil)
-                     ("(gauche-refe.info)Class Index" nil
-                      "^[ \t]+-- [^:]+:[ \t]*" nil)
-                     ("(gauche-refe.info)Variable Index" nil
-                      "^[ \t]+-- [^:]+:[ \t]*" nil))
-         :parse-rule  nil
-         :other-modes nil))
-      ((ja)
-       '(info-lookup-add-help
-         :topic 'symbol
-         :mode  'gauche-mode
-         :regexp "[^()'\" \t\n]+"
-         :ignore-case nil
-         :doc-spec '(("(gauche-refj.info)Index - 手続きと構文索引" nil
-                      "^[ \t]+-+ [^:]+:[ \t]*" nil)
-                     ("(gauche-refj.info)Index - モジュール索引" nil
-                      "^[ \t]+-+ [^:]+:[ \t]*" nil)
-                     ("(gauche-refj.info)Index - クラス索引" nil
-                      "^[ \t]+-+ [^:]+:[ \t]*" nil)
-                     ("(gauche-refj.info)Index - 変数索引" nil
-                      "^[ \t]+-+ [^:]+:[ \t]*" nil))
-         :parse-rule  nil
-         :other-modes nil))
-      (t
-       (error "invalid gauche-mode-info-language: %s"
-              gauche-mode-info-language)))))
+  (info-lookup-add-help
+   :topic 'symbol
+   :mode  'gauche-mode
+   :regexp "[^()'\" \t\n]+"
+   :ignore-case nil
+   :parse-rule  nil
+   :other-modes nil
+   :doc-spec (cl-case gauche-mode-info-language
+               ((en)
+                '(("(gauche-refe.info)Function and Syntax Index" nil
+                   "^[ \t]+-- [^:]+:[ \t]*" nil)
+                  ("(gauche-refe.info)Module Index" nil
+                   "^[ \t]+-- [^:]+:[ \t]*" nil)
+                  ("(gauche-refe.info)Class Index" nil
+                   "^[ \t]+-- [^:]+:[ \t]*" nil)
+                  ("(gauche-refe.info)Variable Index" nil
+                   "^[ \t]+-- [^:]+:[ \t]*" nil)
+                  ))
+               ((ja)
+                '(("(gauche-refj.info)Index - 手続きと構文索引" nil
+                   "^[ \t]+-+ [^:]+:[ \t]*" nil)
+                  ("(gauche-refj.info)Index - モジュール索引" nil
+                   "^[ \t]+-+ [^:]+:[ \t]*" nil)
+                  ("(gauche-refj.info)Index - クラス索引" nil
+                   "^[ \t]+-+ [^:]+:[ \t]*" nil)
+                  ("(gauche-refj.info)Index - 変数索引" nil
+                   "^[ \t]+-+ [^:]+:[ \t]*" nil)
+                  ))
+               (t
+                (error "invalid gauche-mode-info-language: %s"
+                       gauche-mode-info-language)))))
 
 (gauche-mode-setup-info-look)
+
+(add-to-list 'file-coding-system-alist
+             '("gauche-refj\\.info.*" . utf-8))
 
 (defun gauche-mode-info-candidates (&optional _pat)
   (mapcar #'car (info-lookup->completions 'symbol 'gauche-mode)))
