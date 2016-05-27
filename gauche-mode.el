@@ -610,12 +610,12 @@ but use macroexpand-1 instead."
 
 ;;;###autoload
 (add-to-list 'auto-mode-alist
-             (cons "\\.\\(sld\\|sci\\|scm\\)\\'"
-                   'gauche-mode))
+             '("\\.\\(sld\\|sci\\|scm\\)\\'"
+               . gauche-mode))
 
 ;;;###autoload
 (add-to-list 'interpreter-mode-alist
-             (cons "gosh" 'gauche-mode))
+             '("gosh" . gauche-mode))
 
 (provide 'gauche-mode)
 ;;; gauche-mode.el ends here
