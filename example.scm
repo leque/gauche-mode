@@ -16,6 +16,8 @@
 #;
 (display (fact 10))
 
+#|block comment|#
+
 #0=(write-shared #0#)
 
 (define uvectors

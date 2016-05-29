@@ -365,11 +365,6 @@
    scheme-font-lock-keywords-1
    scheme-font-lock-keywords-2))
 
-(defvar gauche-mode-syntax-table
-  (let ((syntax (copy-syntax-table scheme-mode-syntax-table)))
-    (modify-syntax-entry ?\# "' 14bp" syntax)
-    syntax))
-
 (defun gauche-syntax-propertize (beg end)
   (goto-char beg)
   (scheme-syntax-propertize-sexp-comment (point) end)
@@ -440,7 +435,6 @@
 (define-derived-mode gauche-mode scheme-mode
   "Gauche" "Major mode for Gauche."
   (use-local-map gauche-mode-map)
-  (set-syntax-table gauche-mode-syntax-table)
   (setq scheme-program-name "gosh")
   (gauche-mode-switch-define-record-type)
   (setq comment-start ";;")
