@@ -374,25 +374,32 @@
     ((rx (submatch "#") ";")
      (1 (prog1 "< cn"
           (scheme-syntax-propertize-sexp-comment (point) end))))
+    ;; tokens that might be terminated by "#"
+    ;; This avoids conflict with tokens start with "#". (e.g. "#\#//")
+    ((rx (or (seq "#\\"
+                  (or (1+ word)
+                      anything))
+             (seq "#" (1+ digit) "#")))
+     (0 nil))
     ;; regexps
     ((rx (submatch "#")
          "/"
-         (0+ (or (seq "\\" any)
+         (0+ (or (seq "\\" anything)
                  (not (any "/\\"))
                  ))
          (or (seq "/" (submatch "i"))
              (submatch "/")))
-     (1 "| cn")
+     (1 "| 14")
      (2 "|")
      (3 "|"))
     ;; SRFI-14 Character-set
     ((rx (submatch "#")
          "["
-         (0+ (or (seq "\\" any)
+         (0+ (or (seq "\\" anything)
                  (seq "[:" (0+ lower) ":]")
                  (not (any "[]\\"))))
          (submatch "]"))
-     (1 "| cn")
+     (1 "| 14")
      (2 "|"))
     ;; R6RS inline hex escape
     ((rx "\\" (any "Xx") (1+ hex-digit) (submatch ";"))
