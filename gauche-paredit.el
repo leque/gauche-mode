@@ -26,6 +26,7 @@
 
 ;;; Code:
 (require 'rx)
+(require 'nadvice)
 (require 'paredit)
 (require 'gauche-mode)
 
@@ -49,17 +50,22 @@
 (defun gauche-paredit-in-char-set-p ()
   "True if the parse state within a char-set literal"
   (and (paredit-in-string-p)
-       (save-excursion
-         (goto-char (car (paredit-string-start+end-points)))
-         (looking-at-p (rx "#[")))))
+       (gauche-paredit--in-char-set-p0)))
+
+(defun gauche-paredit--in-char-set-p0 ()
+  (save-excursion
+    (goto-char (car (paredit-string-start+end-points)))
+    (looking-at-p (rx "#["))))
 
 (defun gauche-paredit-in-regexp-p ()
   "True if the parse state within a regexp literal"
   (and (paredit-in-string-p)
-       (let ((start (car (paredit-string-start+end-points))))
-         (string= "#/"
-                  (buffer-substring-no-properties start
-                                                  (+ 2 start))))))
+       (gauche-paredit--in-regexp-p0)))
+
+(defun gauche-paredit--in-regexp-p0 ()
+  (save-excursion
+    (goto-char (car (paredit-string-start+end-points)))
+    (looking-at-p (rx "#/"))))
 
 (defun gauche-paredit-slash (&optional n)
   "After `#`, insert pair of slashes.
@@ -119,6 +125,108 @@ Otherwise, insert a literal slash.
           (forward-char)
         (insert "\\]")))))
 
+(defun gauche-paredit-around-forward-delete-in-string (f &rest args)
+  (if (not gauche-paredit-mode)
+      (apply f args)
+    (let ((in-re (gauche-paredit--in-regexp-p0))
+          (in-cs (gauche-paredit--in-char-set-p0)))
+      (if (not (or in-re in-cs))
+          (apply f args)
+        (let* ((start+end (paredit-string-start+end-points))
+               (beg (car start+end))
+               (end (cdr start+end))
+               (p (point)))
+          (cond
+           ;; #/../i
+           ((and in-re (eql (char-after end) ?\i))
+            (cond ((= p end)              ; #/../|i
+                   (delete-char +1))
+                  ((= p (1- end))         ; #/..|/i
+                   (when (= p (1- end))   ; #/|/
+                     (delete-char -2)
+                     (delete-char +2)))
+                  ((= p (1+ beg))         ; #|/../i
+                   (when (= p (- end 2))  ; #|//i
+                     (delete-char -1)
+                     (delete-char +3)))
+                  (t
+                   (apply f args))))
+           ;; #/../, #[..]
+           (t
+            (cond ((= p end)              ; #/..|/
+                   (when (= p (+ beg 2))  ; #/|/
+                     (delete-char -2)
+                     (delete-char +1)))
+                  ((= p (1+ beg))         ; #|/../
+                   (when (= p (1- end))   ; #|//
+                     (delete-char -1)
+                     (delete-char +2)))
+                  ((and in-cs             ; #[..|[:..:]..]
+                        (>= p (+ beg 2))
+                        (not (paredit-in-string-escape-p))
+                        (eql ?\[ (char-after p)))
+                   (save-match-data
+                     (goto-char p)
+                     (re-search-forward (rx ":]") end t)
+                     (delete-region p (match-end 0))))
+                  (t
+                   (apply f args))))))))))
+
+(defun gauche-paredit-around-backward-delete-in-string (f &rest args)
+  (if (not gauche-paredit-mode)
+      (apply f args)
+    (let ((in-re (gauche-paredit--in-regexp-p0))
+          (in-cs (gauche-paredit--in-char-set-p0)))
+      (if (not (or in-re in-cs))
+          (apply f args)
+        (let* ((start+end (paredit-string-start+end-points))
+               (beg (car start+end))
+               (end (cdr start+end))
+               (p (point)))
+          (cond
+           ;; #/../i
+           ((and in-re (eql (char-after end) ?\i))
+            (cond ((= p end)              ; #/../|i
+                   (backward-char +1))
+                  ((= p (+ beg 2))        ; #/|../i
+                   (when (= p (1- end))   ; #/|/
+                     (delete-char -2)
+                     (delete-char +2)))
+                  ((= p (1+ beg))         ; #|/../i
+                   (when (= p (- end 2))  ; #|//i
+                     (delete-char -1)
+                     (delete-char +3)))
+                  (t
+                   (apply f args))))
+           ;; #/../, #[..]
+           (t
+            (cond ((= p (+ beg 2))        ; #/|../
+                   (when (= p end)        ; #/|/
+                     (delete-char -2)
+                     (delete-char +1)))
+                  ((= p (1+ beg))         ; #|/../
+                   (when (= p (1- end))   ; #|//
+                     (delete-char -1)
+                     (delete-char +2)))
+                  ((and in-cs             ; #[..[:..:]|..]
+                        (>= p (+ beg 2))
+                        (not (paredit-in-string-escape-p))
+                        (eql ?\] (char-before p)))
+                   (save-match-data
+                     (goto-char beg)
+                     (let (pos)
+                       (while (re-search-forward (rx "[:") p t)
+                         (setq pos (match-beginning 0)))
+                       (delete-region pos p))))
+                  (t
+                   (apply f args))))))))))
+
+(advice-add 'paredit-forward-delete-in-string
+            :around #'gauche-paredit-around-forward-delete-in-string)
+
+(advice-add 'paredit-backward-delete-in-string
+            :around #'gauche-paredit-around-backward-delete-in-string)
+
 (defvar gauche-paredit-mode-map
   (let ((map (make-sparse-keymap)))
     (define-key map (kbd "/") #'gauche-paredit-slash)
@@ -145,4 +253,7 @@ Otherwise, insert a literal slash.
   (gauche-paredit-mode -1))
 
 (provide 'gauche-paredit)
+;; Local Variables:
+;; comment-column: 42
+;; End:
 ;;; gauche-paredit.el ends here
