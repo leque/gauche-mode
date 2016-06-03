@@ -41,7 +41,8 @@
 
 
 ;;;###autoload
-(add-to-list 'ac-modes 'gauche-mode)
+(eval-after-load "auto-complete"
+  '(add-to-list 'ac-modes 'gauche-mode))
 
 (provide 'ac-gauche)
 ;;; ac-gauche.el ends here
