@@ -88,6 +88,20 @@
   (setq gauche-mode-define-record-type-syntax 'r6rs)
   (gauche-mode-switch-define-record-type))
 
+;; SRFI-35:
+;;  (define-condition-type condition-type supertype predicate field-spec ...)
+;; R6RS:
+;;  (define-condition-type condition-type ‌‌supertype constructor predicate field-spec1 ...)
+(defun gauche-mode-indent-define-condition-type
+    (state indent-point normal-indent)
+  (let ((count (or (ignore-errors
+                     (forward-sexp 4)
+                     (skip-syntax-forward " ")
+                     (and (thing-at-point 'symbol)
+                          4))
+                   3)))
+    (lisp-indent-specform count state indent-point normal-indent)))
+
 (defvar gauche-mode-posix-char-set-names
   '("alnum" "alpha" "blank" "cntrl" "digit" "graph"
     "lower" "print" "punct" "space" "upper" "xdigit"))
@@ -153,7 +167,7 @@
     (define-cise-stmt nil t)
     (define-cise-toplevel nil t)
     (define-class nil t)
-    (define-condition-type 2 t)
+    (define-condition-type gauche-mode-indent-define-condition-type t)
     (define-constant nil t)
     (define-dict-interface nil t)
     (define-generic nil t)
