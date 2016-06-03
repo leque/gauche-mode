@@ -92,3 +92,15 @@ With a prefix argument, you can export symbols with renaming.
 |
 ;; -| (lcons* 1 2 3)
 ```
+
+## gauche-paredit.el
+
+Gauche-aware paredit-mode.
+
+### How to use
+
+`M-x enable-gauche-paredit-mode` or put below in your configuration file.
+
+```
+(add-hook 'gauche-mode-hook #'enable-gauche-paredit-mode)
+```
