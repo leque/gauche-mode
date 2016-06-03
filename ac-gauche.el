@@ -22,24 +22,26 @@
 
 ;;; Commentary:
 
+;;; (add-hook 'gauche-mode-hook #'ac-gauche-setup)
+
 ;;; Code:
 
-(require 'cl-lib)
 (require 'auto-complete)
 (require 'gauche-mode)
 
-(defun ac-gauche-mode-setup ()
-  (setq ac-sources (append '(ac-source-gauche ac-source-gtags)
+;;;###autoload
+(defun ac-gauche-setup ()
+  (setq ac-sources (append '(ac-source-gauche-info ac-source-gtags)
                            ac-sources)))
 
-(ac-define-source gauche
+(ac-define-source gauche-info
                   '((symbol . "s")
                     (candidates . gauche-mode-info-candidates)
                     (cache)))
 
-(add-hook 'gauche-mode-hook #'ac-gauche-mode-setup)
 
-(cl-pushnew 'gauche-mode ac-modes)
+;;;###autoload
+(add-to-list 'ac-modes 'gauche-mode)
 
 (provide 'ac-gauche)
 ;;; ac-gauche.el ends here
