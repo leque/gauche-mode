@@ -88,6 +88,10 @@
   (setq gauche-mode-define-record-type-syntax 'r6rs)
   (gauche-mode-switch-define-record-type))
 
+(defvar gauche-mode-posix-char-set-names
+  '("alnum" "alpha" "blank" "cntrl" "digit" "graph"
+    "lower" "print" "punct" "space" "upper" "xdigit"))
+
 (defvar gauche-keywords
   ;; ((name indent highlight?) ...)
   `(

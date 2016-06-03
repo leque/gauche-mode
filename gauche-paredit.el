@@ -22,6 +22,8 @@
 
 ;;; Commentary:
 
+;;; (add-hook 'gauche-mode-hook #'enable-gauche-paredit-mode)
+
 ;;; Code:
 (require 'rx)
 (require 'paredit)
@@ -44,7 +46,15 @@
           (not (looking-back gauche-paredit-paren-prefix-pat))
         t)))
 
+(defun gauche-paredit-in-char-set-p ()
+  "True if the parse state within a char-set literal"
+  (and (paredit-in-string-p)
+       (save-excursion
+         (goto-char (car (paredit-string-start+end-points)))
+         (looking-at-p (rx "#[")))))
+
 (defun gauche-paredit-in-regexp-p ()
+  "True if the parse state within a regexp literal"
   (and (paredit-in-string-p)
        (let ((start (car (paredit-string-start+end-points))))
          (string= "#/"
@@ -82,13 +92,57 @@ Otherwise, insert a literal slash.
              (paredit-insert-pair n ?\/ ?\/ 'paredit-forward-for-quote)
            (insert ?\/)))))
 
-(add-hook 'gauche-mode-hook
-          #'(lambda ()
-              (set (make-local-variable
-                    'paredit-space-for-delimiter-predicates)
-                   (list #'gauche-paredit-space-for-delimiter-p))))
+(defun gauche-paredit-open-square (&optional n)
+  (interactive "P")
+  (if (not (gauche-paredit-in-char-set-p))
+      (paredit-open-square n)
+    (let ((p (paredit-string-start+end-points)))
+      (if (= (point) (1+ (car p)))
+          (forward-char)
+        (let ((ch (read-char)))
+          (if (eql ch ?\:)
+              (let ((name (completing-read
+                           "char-set name: "
+                           gauche-mode-posix-char-set-names)))
+                (insert "[:" name ":]"))
+            (insert "\\["
+                    (if (eql ch ?\ )
+                        ""
+                      ch))))))))
 
-(define-key gauche-mode-map "/" #'gauche-paredit-slash)
+(defun gauche-paredit-close-square (&optional n)
+  (interactive "P")
+  (if (not (gauche-paredit-in-char-set-p))
+      (paredit-close-square n)
+    (let ((p (paredit-string-start+end-points)))
+      (if (= (point) (cdr p))
+          (forward-char)
+        (insert "\\]")))))
+
+(defvar gauche-paredit-mode-map
+  (let ((map (make-sparse-keymap)))
+    (define-key map (kbd "/") #'gauche-paredit-slash)
+    (define-key map (kbd "[") #'gauche-paredit-open-square)
+    (define-key map (kbd "]") #'gauche-paredit-close-square)
+    map))
+
+;;;###autoload
+(define-minor-mode gauche-paredit-mode
+  "Minor-mode for Gauche-aware paredit"
+  nil
+  gauche-paredit-mode-map
+  (setq-local paredit-space-for-delimiter-predicates
+              (list #'gauche-paredit-space-for-delimiter-p))
+  (paredit-mode (if gauche-paredit-mode +1 -1)))
+
+;;;###autoload
+(defun enable-gauche-paredit-mode ()
+  (interactive)
+  (gauche-paredit-mode +1))
+
+(defun disable-gauche-paredit-mode ()
+  (interactive)
+  (gauche-paredit-mode -1))
 
 (provide 'gauche-paredit)
 ;;; gauche-paredit.el ends here
