@@ -125,6 +125,64 @@ Otherwise, insert a literal slash.
           (forward-char)
         (insert "\\]")))))
 
+(defun gauche-paredit-around-forward-delete (f &optional argument &rest args)
+  "around advice for `paredit-forward-delete'.
+
+Handle forward deletion immediately before regexps and char-sets.
+If an expression is empty, delete the expression,
+otherwise move forward into the expression."
+  (cond ((or (not gauche-paredit-mode)
+             (consp argument)
+             (integerp argument)
+             (eobp))
+         (funcall f argument))
+        ;; |#/../, |#[..]
+        ((and (eql ?\# (char-after))
+              (not (paredit-in-string-p))
+              (save-excursion
+                (forward-char)
+                (and paredit-in-string-p
+                     (or (gauche-paredit--in-regexp-p0)
+                         (gauche-paredit--in-char-set-p0)))))
+         (cond ((save-excursion
+                  (paredit-handle-sexp-errors (progn (forward-sexp) t)
+                    nil))
+                (forward-char)
+                (paredit-backward-delete-in-string))
+               (t
+                (message "Deleting spurious opening delimiter.")
+                (delete-char +1))))
+        (t
+         (funcall f argument))))
+
+(defun gauche-paredit-around-backward-delete (f &optional argument &rest args)
+  "around advice for `paredit-backward-delete'.
+
+Handle backward deletion immediately after non-case-folding regexps.
+If a regexp is empty, delete the whole regexp,
+otherwise move backward into the regexp."
+  (cond ((or (not gauche-paredit-mode)
+             (consp argument)
+             (integerp argument)
+             (bobp))
+         (funcall f argument))
+        ;; #/../|
+        ((and (eql ?\/ (char-before))
+              (not (paredit-in-string-p))
+              (save-excursion
+                (backward-char)
+                (gauche-paredit-in-regexp-p)))
+         (cond ((save-excursion
+                  (paredit-handle-sexp-errors (progn (backward-sexp) t)
+                    nil))
+                (backward-char)
+                (paredit-forward-delete-in-string))
+               (t
+                (message "Deleting spurious closing delimiter.")
+                (delete-char -1))))
+        (t
+         (funcall f argument))))
+
 (defun gauche-paredit-around-forward-delete-in-string (f &rest args)
   (if (not gauche-paredit-mode)
       (apply f args)
@@ -220,6 +278,12 @@ Otherwise, insert a literal slash.
                        (delete-region pos p))))
                   (t
                    (apply f args))))))))))
+
+(advice-add 'paredit-forward-delete
+            :around #'gauche-paredit-around-forward-delete)
+
+(advice-add 'paredit-backward-delete
+            :around #'gauche-paredit-around-backward-delete)
 
 (advice-add 'paredit-forward-delete-in-string
             :around #'gauche-paredit-around-forward-delete-in-string)
