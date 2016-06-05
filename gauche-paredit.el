@@ -130,10 +130,20 @@ In the middle of a char-set, insert a backslash-escaped square bracket."
   (interactive "P")
   (if (not (gauche-paredit-in-char-set-p))
       (paredit-close-square n)
-    (let ((p (paredit-string-start+end-points)))
-      (if (= (point) (cdr p))
-          (forward-char)
-        (insert "\\]")))))
+    (let* ((start+end (paredit-string-start+end-points))
+           (beg (car start+end))
+           (end (cdr start+end))
+           (p (point)))
+      (cond
+       ;; #|[..]
+       ((= p (1+ beg))
+        (goto-char (1+ end)))
+       ;; #[..|]
+       ((= p end)
+        (forward-char))
+       ;; #[..|..]
+       (t
+        (insert "\\]"))))))
 
 (defun gauche-paredit-around-forward-delete (f &optional argument &rest args)
   "around advice for `paredit-forward-delete'.
