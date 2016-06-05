@@ -68,11 +68,10 @@
     (looking-at-p (rx "#/"))))
 
 (defun gauche-paredit-slash (&optional n)
-  "After `#`, insert pair of slashes.
-At the end of a regexp, move past the closing slash.
-In the middle of regexp, insert a backslash-escaped slash.
-Otherwise, insert a literal slash.
-"
+  "After `#`, insert a pair of slashes.
+At the opening/closing slash of a regexp, move past the slash.
+In the middle of a regexp, insert a backslash-escaped slash.
+Otherwise, insert a literal slash."
   (interactive "P")
   (cond ((gauche-paredit-in-regexp-p)
          (let* ((pair (paredit-string-start+end-points))
@@ -80,15 +79,16 @@ Otherwise, insert a literal slash.
                 (end (cdr pair))
                 (pos (point)))
            (cond
-            ;; before an open/close slash
+            ;; #|/../, #/..|/, or #/..|/i
             ((or (= pos (1+ start))
                  (= pos (if (= ?\/ (char-after end))
                             end
                           (1- end))))
              (forward-char))
-            ;; before `i' flag
+            ;; #/../|i
             ((= pos end)
              (insert ?\/))
+            ;; #/..|../
             (t
              (insert ?\\ ?\/)))))
         ((paredit-in-comment-p)
@@ -99,24 +99,34 @@ Otherwise, insert a literal slash.
            (insert ?\/)))))
 
 (defun gauche-paredit-open-square (&optional n)
+  "Insert a balanced pair of square brackets.
+If not inside a char-set, simply delegate to `paredit-open-square'.
+
+At the opening square bracket of a char-set, move past the bracket.
+In the middle of a char-set, read one more character.
+If the character is ':', insert a POSIX character set,
+otherwise insert a backslash-escaped square bracket."
   (interactive "P")
   (if (not (gauche-paredit-in-char-set-p))
       (paredit-open-square n)
     (let ((p (paredit-string-start+end-points)))
       (if (= (point) (1+ (car p)))
+          ;; #|[..]
           (forward-char)
-        (let ((ch (read-char)))
+        (let ((ch (read-char-exclusive)))
           (if (eql ch ?\:)
               (let ((name (completing-read
                            "char-set name: "
                            gauche-mode-posix-char-set-names)))
                 (insert "[:" name ":]"))
-            (insert "\\["
-                    (if (eql ch ?\ )
-                        ""
-                      ch))))))))
+            (insert "\\[")))))))
 
 (defun gauche-paredit-close-square (&optional n)
+  "Move past one closing delimiter and reindent.
+If not inside a char-set, simply delegate to `paredit-close-square'.
+
+At the end of a char-set, move past the closing square bracket.
+In the middle of a char-set, insert a backslash-escaped square bracket."
   (interactive "P")
   (if (not (gauche-paredit-in-char-set-p))
       (paredit-close-square n)
@@ -184,6 +194,15 @@ otherwise move backward into the regexp."
          (funcall f argument))))
 
 (defun gauche-paredit-around-forward-delete-in-string (f &rest args)
+  "around advice for `paredit-forward-delete-in-string'.
+
+Handle forward deletion inside regexps and char-sets.
+Before a case-folding flag of a regexp, simply delete it.
+Before a opening/closing delimiter, delete the whole expression
+if the expression is empty, otherwise refuse to delete.
+Before a POSIX chararcter set inside a char-set,
+delete the character set.
+Otherwise, simply delegate to `paredit-forward-delete-in-string'."
   (if (not gauche-paredit-mode)
       (apply f args)
     (let ((in-re (gauche-paredit--in-regexp-p0))
@@ -200,7 +219,7 @@ otherwise move backward into the regexp."
             (cond ((= p end)              ; #/../|i
                    (delete-char +1))
                   ((= p (1- end))         ; #/..|/i
-                   (when (= p (1- end))   ; #/|/
+                   (when (= p (1- end))   ; #/|/i
                      (delete-char -2)
                      (delete-char +2)))
                   ((= p (1+ beg))         ; #|/../i
@@ -231,6 +250,15 @@ otherwise move backward into the regexp."
                    (apply f args))))))))))
 
 (defun gauche-paredit-around-backward-delete-in-string (f &rest args)
+  "around advice for `paredit-backward-delete-in-string'.
+
+Handle backward deletion inside regexps and char-sets.
+After a closing delimiter of a regexp, move backward into the regexp.
+After a '#' prefix or a opening delimiter, delete the whole expression
+if the expression is empty, otherwise refuse to delete.
+After a POSIX chararcter set inside a char-set,
+delete the character set.
+Otherwise, simply delegate to `paredit-backward-delete-in-string'."
   (if (not gauche-paredit-mode)
       (apply f args)
     (let ((in-re (gauche-paredit--in-regexp-p0))
