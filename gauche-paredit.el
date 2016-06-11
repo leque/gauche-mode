@@ -339,8 +339,7 @@ Otherwise, simply delegate to `paredit-backward-delete-in-string'."
 ;;;###autoload
 (define-minor-mode gauche-paredit-mode
   "Minor-mode for Gauche-aware paredit"
-  nil
-  gauche-paredit-mode-map
+  :keymap gauche-paredit-mode-map
   (setq-local paredit-space-for-delimiter-predicates
               (list #'gauche-paredit-space-for-delimiter-p))
   (paredit-mode (if gauche-paredit-mode +1 -1)))
