@@ -39,10 +39,7 @@
                     (candidates . gauche-mode-info-candidates)
                     (cache)))
 
-
-;;;###autoload
-(eval-after-load "auto-complete"
-  '(add-to-list 'ac-modes 'gauche-mode))
+(add-to-list 'ac-modes 'gauche-mode)
 
 (provide 'ac-gauche)
 ;;; ac-gauche.el ends here
