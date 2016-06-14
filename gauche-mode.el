@@ -67,26 +67,16 @@
 
 (make-variable-buffer-local 'gauche-mode-define-record-type-syntax)
 
-(defun gauche-mode-switch-define-record-type ()
-  (put 'define-record-type
-       'scheme-indent-function
-       (cl-case gauche-mode-define-record-type-syntax
-         ((srfi) 3)
-         ((r6rs) 1)
-         (t (error "Unknown syntax for define-record-type: %s"
-                   gauche-mode-define-record-type-syntax)))))
-
-(defun gauche-mode-use-srfi-define-record-type ()
-  "indent `define-record-type' according to SRFI-99 syntax."
-  (interactive)
-  (setq gauche-mode-define-record-type-syntax 'srfi)
-  (gauche-mode-switch-define-record-type))
-
-(defun gauche-mode-use-r6rs-define-record-type ()
-  "indent `define-record-type' according to R6RS syntax."
-  (interactive)
-  (setq gauche-mode-define-record-type-syntax 'r6rs)
-  (gauche-mode-switch-define-record-type))
+(defun gauche-mode-indent-define-record-type
+    (state indent-point normal-indent)
+  (let ((count (cl-case gauche-mode-define-record-type-syntax
+                 ((srfi) 3)
+                 ((r6rs) 1)
+                 (t
+                  (warn "Unknown syntax for define-record-type: %s"
+                        gauche-mode-define-record-type-syntax)
+                  1))))
+    (lisp-indent-specform count state indent-point normal-indent)))
 
 ;; SRFI-35:
 ;;  (define-condition-type condition-type supertype predicate field-spec ...)
@@ -177,7 +167,7 @@
     (define-method nil t)
     (define-module nil t)
     (define-reader-ctor nil t)
-    (define-record-type nil t)
+    (define-record-type gauche-mode-indent-define-record-type t)
     (define-syntax nil t)
     (define-values nil t)
     (delay 0 t)
@@ -461,7 +451,6 @@
   "Gauche" "Major mode for Gauche."
   (use-local-map gauche-mode-map)
   (setq scheme-program-name "gosh")
-  (gauche-mode-switch-define-record-type)
   (setq comment-start ";;")
   (setq font-lock-defaults
         `(,gauche-mode-font-lock-keywords
