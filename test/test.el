@@ -1,5 +1,8 @@
 (require 'ert)
 (require 'gauche-mode)
+(require 'gauche-paredit)
+
+(add-hook 'gauche-mode-hook #'enable-gauche-paredit-mode)
 
 (defmacro gauche-with-temp-buffer (contents &rest body)
   (declare (indent 1))
@@ -68,3 +71,9 @@
                     |  (x kar set-kar!)
                     |  (y kdr))
                     |")))))
+
+(ert-deftest gauche-paredit-slash-test ()
+  (gauche-with-temp-buffer ""
+    (insert "#")
+    (gauche-paredit-slash)
+    (should (equal (buffer-string) "#//"))))
