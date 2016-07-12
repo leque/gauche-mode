@@ -2,7 +2,7 @@ EMACS ?= emacs
 CASK ?= cask
 LOADPATH = -L .
 ELPA_DIR = \
-    .cask/$(shell $(EMACS) -Q --batch --eval '(princ emacs-version)')/elpa
+    $(shell emacs=$(EMACS) $(CASK) package-directory)
 
 .PHONY: test
 
