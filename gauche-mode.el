@@ -149,6 +149,7 @@
     (current-module nil t)
     (cut nil t)
     (cute nil t)
+    (debug-funcall nil t)
     (debug-print nil t)
     (dec! nil t)
     (define nil t)
@@ -180,6 +181,7 @@
     (dynamic-wind 0 nil)
     (eager 0 nil)
     (ecase 1 t)
+    (er-macro-transformer 0 t)
     (every?-ec nil t)
     (export nil t)
     (export-all nil t)
@@ -250,6 +252,7 @@
     (product-ec nil t)
     (push! nil t)
     (quasiquote nil t)
+    (quasirename 1 t)
     (quote nil t)
     (rec 1 t)
     (receive 2 t)
@@ -366,7 +369,8 @@
       0 font-lock-comment-face)
      (,(rx buffer-start "#!" (0+ any))
       0 font-lock-preprocessor-face t)
-     (,(rx (or "#?="
+     (,(rx (or "#?,"
+               "#?="
                (seq "#" (1+ digit) (or "#" "="))))
       0 font-lock-preprocessor-face)
      )
@@ -572,6 +576,11 @@ but use macroexpand-1 instead."
   "toggle #?= (debug-print)"
   (interactive)
   (gauche-mode--toggle-symbol "#?="))
+
+(defun gauche-mode-toggle-debug-funcall ()
+  "toggle #?, (debug-funcall)"
+  (interactive)
+  (gauche-mode--toggle-symbol "#?,"))
 
 (defun gauche-mode-toggle-datum-comment ()
   "toggle #; (datum comment)"

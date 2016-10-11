@@ -38,6 +38,7 @@
     (seq "#" (any "f") (or "16" "32" "64"))      ; SRFI-4 + Gauche's extension
     "#vu8"                                       ; R6RS bytevectors
     "(^"                                         ; (^(x y) ...)
+    "#?,"                                        ; debug-funcall
     "#?="                                        ; debug-print
     )))
 

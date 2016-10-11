@@ -7,7 +7,7 @@
   (if (= n 0)
       1
       ;; you can toggle #?= (debug-print) by `C-c C-d`
-      #?=(* (fact (- n 1)))))
+      #?=(* n (fact (- n 1)))))
 
 ;; `C-c M-d` disassemble a procedure at point
 (display fact)
