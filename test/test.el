@@ -215,6 +215,63 @@
    |")
   )
 
+(ert-deftest gauche-mode-toggle-paren-type-test ()
+  (should
+   (equal "[a (b c) d]"
+          (gauche-with-temp-buffer "(a (b c) d)"
+            (goto-char (point-min))
+            (gauche-mode-toggle-paren-type)
+            (buffer-string))))
+  (should
+   (equal "(a (b c) d)"
+          (gauche-with-temp-buffer "[a (b c) d]"
+            (goto-char (point-min))
+            (gauche-mode-toggle-paren-type)
+            (buffer-string))))
+  (should
+   (equal "(a [b c] d)"
+          (gauche-with-temp-buffer "(a (b c) d)"
+            (goto-char 4)
+            (gauche-mode-toggle-paren-type)
+            (buffer-string))))
+  (should
+   (equal "(a [b c] d)"
+          (gauche-with-temp-buffer "(a (b c) d)"
+            (goto-char 8)
+            (gauche-mode-toggle-paren-type)
+            (buffer-string))))
+  (should
+   (equal "(a (b c) d)"
+          (gauche-with-temp-buffer "[a (b c) d]"
+            (goto-char (point-min))
+            (gauche-mode-toggle-paren-type)
+            (buffer-string))))
+  (should
+   (equal "[a (b c) d]"
+          (gauche-with-temp-buffer "(a (b c) d)"
+            (goto-char (point-max))
+            (backward-char 1)
+            (gauche-mode-toggle-paren-type)
+            (buffer-string))))
+  (should
+   (equal "[a (b c) d"
+          (gauche-with-temp-buffer "(a (b c) d"
+            (goto-char (point-min))
+            (gauche-mode-toggle-paren-type)
+            (buffer-string))))
+  (should
+   (equal "(a [b c] d"
+          (gauche-with-temp-buffer "(a (b c) d"
+            (goto-char 4)
+            (gauche-mode-toggle-paren-type)
+            (buffer-string))))(should
+   (equal "(a [b c d]"
+          (gauche-with-temp-buffer "(a (b c d)"
+            (goto-char 4)
+            (gauche-mode-toggle-paren-type)
+            (buffer-string))))
+  )
+
 (ert-deftest gauche-paredit-slash-test ()
   (gauche-with-temp-buffer ""
     (enable-gauche-paredit-mode)

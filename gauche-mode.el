@@ -387,6 +387,44 @@ but use macroexpand-1 instead."
   (interactive)
   (gauche-mode--toggle-symbol "#;"))
 
+(defun gauche-mode--paren-pairs (p)
+  (cl-case p
+    ((?\( ?\))
+     '(?\[ . ?\]))
+    ((?\[ ?\])
+     '(?\( . ?\)))
+    (t
+     nil)))
+
+(defun gauche-mode--toggle-paren-type (ch at-open)
+  "toggle parentheses and brackets"
+  (interactive)
+  (let* ((p (gauche-mode--paren-pairs ch))
+         (dir (if at-open 1 -1))
+         (a (if at-open (car p) (cdr p)))
+         (b (if at-open (cdr p) (car p))))
+    (when p
+      (save-excursion
+        (delete-char 1)
+        (insert a)
+        (when at-open
+          (backward-char dir))
+        (ignore-errors
+          (forward-sexp dir)
+          (backward-delete-char dir)
+          (insert b))))))
+
+(defun gauche-mode-toggle-paren-type ()
+  "toggle parentheses and brackets"
+  (interactive)
+  (let ((ch (char-after)))
+    (cl-case ch
+      ((?\( ?\[)
+       (gauche-mode--toggle-paren-type ch t))
+      ((?\) ?\])
+       (gauche-mode--toggle-paren-type ch nil))
+      (t nil))))
+
 ;;; info-look
 (defun gauche-mode-setup-info-look ()
   "setup info-lookup based on `gauche-mode-info-language'"
