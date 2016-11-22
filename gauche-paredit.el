@@ -122,15 +122,15 @@ otherwise insert a backslash-escaped square bracket."
                 (insert "[:" name ":]"))
             (insert "\\[")))))))
 
-(defun gauche-paredit-close-square (&optional n)
+(defun gauche-paredit-close-square ()
   "Move past one closing delimiter and reindent.
 If not inside a char-set, simply delegate to `paredit-close-square'.
 
 At the end of a char-set, move past the closing square bracket.
 In the middle of a char-set, insert a backslash-escaped square bracket."
-  (interactive "P")
+  (interactive)
   (if (not (gauche-paredit-in-char-set-p))
-      (paredit-close-square n)
+      (paredit-close-square)
     (let* ((start+end (paredit-string-start+end-points))
            (beg (car start+end))
            (end (cdr start+end))
