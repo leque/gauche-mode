@@ -3,6 +3,9 @@ CASK ?= cask
 LOADPATH = -L .
 ELPA_DIR = \
     $(shell emacs=$(EMACS) $(CASK) package-directory)
+GOSH ?= gosh
+GAUCHE_SRC =
+GEN_KEYWORDS = tools/gen-keywords-list.scm
 
 .PHONY: test
 
@@ -14,3 +17,6 @@ test: $(ELPA_DIR)
 $(ELPA_DIR): Cask
 	$(CASK) install
 	touch $@
+
+gauche-keywords.el: $(GAUCHE_SRC)/doc/gauche-refe.texi $(GEN_KEYWORDS)
+	$(GOSH) $(GEN_KEYWORDS) -o $@ $<

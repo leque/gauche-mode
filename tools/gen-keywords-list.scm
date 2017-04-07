@@ -80,6 +80,7 @@
 (use srfi-2)
 (use srfi-13)
 (use gauche.generator)
+(use gauche.parseopt)
 (use gauche.sequence)
 (use util.match)
 
@@ -176,18 +177,40 @@
      (f name (calc-syntax-indent 0 args) 't))
     (_ #f)))
 
+(define (usage out name status)
+  (format out "\
+usage: ~A -o output.lisp /path/to/gauche-refe.texi
+"
+          name)
+  (exit status))
+
 (define (main args)
-  (format #t "    ;; generated from ~A~%"
-          (sys-basename (cadr args)))
-  (for-each
-   (cut format #t "    ~S~%" <>)
-   (delete-duplicates
-    (filter-map calc-indent
-                (sort (call-with-input-file (cadr args) read-info)
-                      default-comparator
-                      (lambda (x)
-                        (and x
-                             (list (cadr x) (- (length x)))))))
-    (lambda (x y)
-      (equal? (car x) (car y)))))
-  0)
+  (define (error-usage)
+    (usage (current-error-port) (car args) 1))
+  (let-args (cdr args)
+      ((outfile "o=s")
+       . rest)
+    (unless outfile
+      (error-usage))
+    (call-with-output-file outfile
+      (lambda (out)
+        (match rest
+          ((infile)
+           (format out ";;; Generated from ~A. DO NOT EDIT~%"
+                   (sys-basename infile))
+           (format out "(~%")
+           (for-each
+            (cut format out " ~S~%" <>)
+            (delete-duplicates
+             (filter-map calc-indent
+                         (sort (call-with-input-file infile read-info)
+                               default-comparator
+                               (lambda (x)
+                                 (and x
+                                      (list (cadr x) (- (length x)))))))
+             (lambda (x y)
+               (equal? (car x) (car y)))))
+           (format out " )~%")
+           0)
+          (_
+           (error-usage)))))))
