@@ -139,11 +139,13 @@
      (f name
         'gauche-mode-indent-define-record-type
         't))
-    ((':syntax (and name "match-define") . _)
-     (f name 'defun 't))
-    ((_typ (and name (? string?) (? #/^define/)) . _)
+    ((_typ (and name
+                (? string?)
+                (or "match-define"
+                    (? #/^define\b/)))
+           . _)
      ;; NB: define-reader-ctor is a procedure. But highlight it anyway.
-     (f name 'nil 't))
+     (f name 'defun 't))
     ((':syntax (and name (or "syntax-error" "syntax-errorf")) . _)
      (f name 'nil 't))
     ((':syntax (and name (or "let" "syntax-rules" "match-let")) . _)
