@@ -157,7 +157,7 @@
     ((':syntax (and name "quasirename") . _)
      (f name 1 't))
     ((':syntax (and name (or "while" "until")) . _)
-     (f name 1 't))
+     (f name 'gauche-mode-indent-while/until 't))
     ((':syntax (and name
                     (? string?)
                     (or (? #/-if$/)

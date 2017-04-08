@@ -32,6 +32,14 @@
                             ""
                             str))
 
+(defun gauche-test-indent (input expected)
+  (gauche-with-temp-buffer
+      (gauche-test-string input)
+    (goto-char (point-min))
+    (indent-sexp)
+    (should (equal (buffer-substring-no-properties (point-min) (point-max))
+                   (gauche-test-string expected)))))
+
 (ert-deftest gauche-mode-indent-define-record-type-test/r6rs ()
   (gauche-with-temp-buffer
       (gauche-test-string
@@ -86,6 +94,81 @@
                     |  (x kar set-kar!)
                     |  (y kdr))
                     |")))))
+
+(ert-deftest gauche-mode-indent-while/until-test ()
+  (gauche-test-indent
+   "(while expr
+   |body)
+   |"
+   "(while expr
+   |  body)
+   |")
+  (gauche-test-indent
+   "(while expr
+   |)
+   |"
+   "(while expr
+   |  )
+   |")
+  (gauche-test-indent
+   "(while
+   |expr
+   |)
+   |"
+   "(while
+   |    expr
+   |  )
+   |")
+  (gauche-test-indent
+   "(while expr
+   |=> var
+   |body)
+   |"
+   "(while expr
+   |    => var
+   |  body)
+   |")
+  (gauche-test-indent
+   "(while expr
+   |guard
+   |=> var
+   |body)
+   |"
+   "(while expr
+   |    guard
+   |    => var
+   |  body)
+   |")
+  (gauche-test-indent
+   "(while expr guard
+   |=> var
+   |body)
+   |"
+   "(while expr guard
+   |       => var
+   |  body)
+   |")
+  (gauche-test-indent
+   "(while =>
+   |body)
+   |"
+   "(while =>
+   |  body)
+   |")
+  (gauche-test-indent
+   "(while expr
+   |e1
+   |e2
+   |=>
+   |body)
+   |"
+   "(while expr
+   |  e1
+   |  e2
+   |  =>
+   |  body)
+   |")
+  )
 
 (ert-deftest gauche-paredit-slash-test ()
   (gauche-with-temp-buffer ""

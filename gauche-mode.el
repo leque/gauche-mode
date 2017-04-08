@@ -92,6 +92,17 @@
                    3)))
     (lisp-indent-specform count state indent-point normal-indent)))
 
+(defun gauche-mode-indent-while/until (state indent-point normal-indent)
+  (let ((count (or (ignore-errors
+                     (cl-loop for n from 2 upto 4
+                              do (forward-sexp)
+                              when (and (> n 2)
+                                        (equal (thing-at-point 'symbol t) "=>"))
+                              return n
+                              finally return nil))
+                   1)))
+    (lisp-indent-specform count state indent-point normal-indent)))
+
 (defvar gauche-mode-posix-char-set-names
   '("alnum" "alpha" "blank" "cntrl" "digit" "graph"
     "lower" "print" "punct" "space" "upper" "xdigit"))
