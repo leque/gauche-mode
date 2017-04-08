@@ -7,6 +7,7 @@
 
 ;; suppress `Matching: ...' output
 (setq blink-matching-paren nil)
+(setq-default indent-tabs-mode nil)
 
 (defmacro gauche-with-temp-buffer (contents &rest body)
   (declare (indent 1))
@@ -94,6 +95,51 @@
                     |  (x kar set-kar!)
                     |  (y kdr))
                     |")))))
+
+(ert-deftest gauche-mode-indent-define-condition-type-test ()
+  (gauche-test-indent
+   "(define-condition-type &c &condition
+   |c?
+   |(x c-x))
+   |"
+   "(define-condition-type &c &condition
+   |                       c?
+   |  (x c-x))
+   |")
+  (gauche-test-indent
+   "(define-condition-type &c
+   |&condition
+   |c?
+   |(x c-x))
+   |"
+   "(define-condition-type &c
+   |    &condition
+   |    c?
+   |  (x c-x))
+   |")
+  (gauche-test-indent
+   "(define-condition-type &c &condition
+   |make-c c?
+   |(x c-x))
+   |"
+   "(define-condition-type &c &condition
+   |                       make-c c?
+   |  (x c-x))
+   |")
+  (gauche-test-indent
+   "(define-condition-type &c
+   |&condition
+   |make-c
+   |c?
+   |(x c-x))
+   |"
+   "(define-condition-type &c
+   |    &condition
+   |    make-c
+   |    c?
+   |  (x c-x))
+   |")
+  )
 
 (ert-deftest gauche-mode-indent-while/until-test ()
   (gauche-test-indent

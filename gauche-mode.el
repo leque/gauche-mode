@@ -86,7 +86,6 @@
     (state indent-point normal-indent)
   (let ((count (or (ignore-errors
                      (forward-sexp 4)
-                     (skip-syntax-forward " ")
                      (and (thing-at-point 'symbol)
                           4))
                    3)))
