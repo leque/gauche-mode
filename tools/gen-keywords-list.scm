@@ -1,12 +1,11 @@
 (use parser.peg)
 
 (define %dots
-  ($do (($string "@dots{}"))
-       ($return '...)))
+  ($seq ($string "@dots{}")
+        ($return '...)))
 
 (define %dot
-  ($->string
-   ($char #\.)))
+  ($string "."))
 
 (define %lambda-list-keyword
   ($try
@@ -19,16 +18,14 @@
   ($->string ($many1 ($none-of #[(){}\[\]\s]))))
 
 (define %code
-  ($do (($string "@code{"))
-       (sym %symbol)
-       (($char #\}))
-       ($return sym)))
+  ($between ($string "@code{")
+            %symbol
+            ($char #\})))
 
 (define %var
-  ($do (($string "@var{"))
-       (sym %symbol)
-       (($char #\}))
-       ($return sym)))
+  ($between ($string "@var{")
+            %symbol
+            ($char #\})))
 
 (define %setter
   ($do (($string "{(setter "))
@@ -40,33 +37,27 @@
 
 (define %list
   ($lazy
-   ($do (($char #\())
-        (exprs %exprs)
-        (spaces)
-        (($char #\)))
-        ($return exprs))))
+   ($between ($char #\()
+             %exprs
+             ($char #\)))))
 
 (define %opt
   ($lazy
-   ($do (($char #\[))
-        (exprs %exprs)
-        (spaces)
-        (($char #\]))
-        ($return (cons 'opt exprs)))))
+   ($lift (cut cons 'opt <>)
+          ($between ($char #\[)
+                    %exprs
+                    ($char #\])))))
 
 (define %exprs
   ($lazy
-   ($many ($seq spaces %expr))))
+   ($seq spaces ($sep-end-by %expr spaces))))
 
 (define %expr
   ($lazy
    ($or %list %opt %dots %dot %lambda-list-keyword %code %var %setter %symbol)))
 
 (define %spec
-  ($do (es %exprs)
-       (spaces)
-       (eof)
-       ($return es)))
+  ($followed-by %exprs eof))
 
 (define (parse-spec str)
   (guard (exc
@@ -77,8 +68,8 @@
     (peg-parse-string %spec str)))
 
 (use srfi-1)
-(use srfi-2)
 (use srfi-13)
+(use srfi-14)
 (use gauche.generator)
 (use gauche.parseopt)
 (use gauche.sequence)
@@ -90,74 +81,77 @@
            (lambda (line)
              (rxmatch-case line
                (#/^@def(?:mac|spec)x? (.*)$/ (#f spec)
-                (cons ':syntax (parse-spec spec)))
+                `(:syntax ,@(parse-spec spec)))
                (#/^@defunx? (.*)$/ (#f spec)
-                (cons ':proc (parse-spec spec)))
+                `(:proc ,@(parse-spec spec)))
                (#/^@deffnx? {(?:Generic function|Method)} (.*)$/ (#f spec)
-                (cons ':proc (parse-spec spec)))
+                `(:proc ,@(parse-spec spec)))
                (else #f)))
            (port->line-generator port))))
 
 (define (calc-indent spec)
   (define (calc-syntax-indent n args)
     (match args
-      (() 'nil)
+      (() #f)
       ;; with-foo x ... thunk
       ;; for with-signal-handlers
       (("thunk")
        n)
-      ((x y '...)
+      ((x . (and rest (y '...)))
        (if (and (string? x)
                 (string? y)
-                (string-prefix? (string-trim-right x #[0-9])
-                                y))
+                (string=? (string-trim-right x char-set:digit)
+                          (string-trim-right y char-set:digit)))
            ;; foo x ... e0 e1 ...
-           (if (zero? n)
-               'nil
-               n)
-           (calc-syntax-indent (+ n 1) (list y '...))))
+           (and (positive? n) n)
+           (calc-syntax-indent (+ n 1) rest)))
       ((x '...)
        ;; foo x ... body ...
-       (if (zero? n)
-           'nil
-           n))
+       (and (positive? n) n))
       ((_ . rest)
        (calc-syntax-indent (+ n 1) rest))))
+  (define (elisp-boolean x)
+    (case x
+      ((#t) 't)
+      ((#f) 'nil)
+      (else x)))
   (define (f name indent highlight?)
-    `(,(string->symbol name) ,indent ,highlight?))
+    `(,(string->symbol name)
+      ,(elisp-boolean indent)
+      ,(elisp-boolean highlight?)))
   (match spec
     ((':syntax "^c" . _)
      ;; not handled here
      #f)
     ((':proc (and name "call-with-values") . _)
-     (f name 1 'nil))
+     (f name 1 #f))
     ((':syntax (and name "define-condition-type") . _)
      (f name
         'gauche-mode-indent-define-condition-type
-        't))
+        #t))
     ((':syntax (and name "define-record-type") . _)
      (f name
         'gauche-mode-indent-define-record-type
-        't))
+        #t))
     ((_typ (and name
                 (? string?)
                 (or "match-define"
                     (? #/^define\b/)))
            . _)
      ;; NB: define-reader-ctor is a procedure. But highlight it anyway.
-     (f name 'defun 't))
+     (f name 'defun #t))
     ((':syntax (and name (or "syntax-error" "syntax-errorf")) . _)
-     (f name 'nil 't))
+     (f name #f #t))
     ((':syntax (and name (or "let" "syntax-rules" "match-let")) . _)
-     (f name 'scheme-let-indent 't))
+     (f name 'scheme-let-indent #t))
     ((':syntax (and name (or "let-syntax" "letrec-syntax")) . _)
-     (f name 1 't))
+     (f name 1 #t))
     ((':syntax (and name "parse-options") . _)
-     (f name 1 't))
+     (f name 1 #t))
     ((':syntax (and name "quasirename") . _)
-     (f name 1 't))
+     (f name 1 #t))
     ((':syntax (and name (or "while" "until")) . _)
-     (f name 'gauche-mode-indent-while/until 't))
+     (f name 'gauche-mode-indent-while/until #t))
     ((':syntax (and name
                     (? string?)
                     (or (? #/-if$/)
@@ -165,18 +159,18 @@
                . rest)
      (f name
         (let ((l (length (delete ':optional rest))))
-          (if (= l 3) 'nil (- l 2)))
-        't))
+          (and (> l 3) (- l 2)))
+        #t))
     ((':proc (and name
                   (? string?)
                   (? #/^(with-|call\/|call-with-)/)
                   )
              . args)
      (f name
-        (or (find-index (cut member <> '("proc" "thunk")) args) 'nil)
-        'nil))
+        (find-index (cut member <> '("proc" "thunk")) args)
+        #f))
     ((':syntax name . args)
-     (f name (calc-syntax-indent 0 args) 't))
+     (f name (calc-syntax-indent 0 args) #t))
     (_ #f)))
 
 (define (usage out name status)
