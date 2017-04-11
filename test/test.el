@@ -3,8 +3,6 @@
 (require 'gauche-mode)
 (require 'gauche-paredit)
 
-(add-hook 'gauche-mode-hook #'enable-gauche-paredit-mode)
-
 ;; suppress `Matching: ...' output
 (setq blink-matching-paren nil)
 (setq-default indent-tabs-mode nil)
@@ -19,14 +17,15 @@
        (font-lock-fontify-buffer)
        ,@body)))
 
-(defun gauche-with-input-to-temp-buffer (macro)
+(defun gauche-paredit-with-input-to-temp-buffer (macro)
   (gauche-with-temp-buffer ""
+    (enable-gauche-paredit-mode)
     (execute-kbd-macro macro)
     (buffer-string)))
 
-(defun gauche-test-key-sequence (expected input)
+(defun gauche-paredit-test-key-sequence (expected input)
   (should (equal expected
-                 (gauche-with-input-to-temp-buffer input))))
+                 (gauche-paredit-with-input-to-temp-buffer input))))
 
 (defun gauche-test-string (str)
   (replace-regexp-in-string (rx bol (* space) "|")
@@ -218,6 +217,7 @@
 
 (ert-deftest gauche-paredit-slash-test ()
   (gauche-with-temp-buffer ""
+    (enable-gauche-paredit-mode)
     (execute-kbd-macro (kbd "#/"))
     (should (equal (buffer-string) "#//"))
     (font-lock-fontify-buffer)
@@ -233,32 +233,41 @@
 (ert-deftest gauche-paredit-datum-label-prefix-test ()
   (dotimes (_ 100)
     (let ((n (random 1000)))
-      (gauche-test-key-sequence (format "#%s=()" n)
-                                (kbd (format "# %s = (" n))))))
+      (gauche-paredit-test-key-sequence
+       (format "#%s=()" n)
+       (kbd (format "# %s = (" n))))))
 
 (ert-deftest gauche-paredit-debug-print-prefix-test ()
-  (gauche-test-key-sequence "#?=()"
-                            (kbd "# ? = (")))
+  (gauche-paredit-test-key-sequence
+   "#?=()"
+   (kbd "# ? = (")))
 
 (ert-deftest gauche-paredit-vector-prefix-test ()
-  (gauche-test-key-sequence "(f #vu8())"
-                            (kbd "(f SPC #vu8("))
+  (gauche-paredit-test-key-sequence
+   "(f #vu8())"
+   (kbd "(f SPC #vu8("))
   (cl-loop for n in '(8 16 32 64)
            for p in '(s u)
-           do (gauche-test-key-sequence (format "(f #%s%s())" p n)
-                                        (kbd (format "(f SPC #%s%s(" p n))))
-  (gauche-test-key-sequence "(f #s48 ())"
-                            (kbd "(f SPC #s48("))
+           do (gauche-paredit-test-key-sequence
+               (format "(f #%s%s())" p n)
+               (kbd (format "(f SPC #%s%s(" p n))))
+  (gauche-paredit-test-key-sequence
+   "(f #s48 ())"
+   (kbd "(f SPC #s48("))
   (cl-loop for n in '(16 32 64)
-           do (gauche-test-key-sequence (format "(f #f%s())" n)
-                                        (kbd (format "(f SPC #f%s(" n))))
-  (gauche-test-key-sequence "(f #f8 ())"
-                            (kbd "(f SPC #f8("))
+           do (gauche-paredit-test-key-sequence
+               (format "(f #f%s())" n)
+               (kbd (format "(f SPC #f%s(" n))))
+  (gauche-paredit-test-key-sequence
+   "(f #f8 ())"
+   (kbd "(f SPC #f8("))
   )
 
 (ert-deftest gauche-paredit-short-lambda-prefix-test ()
-  (gauche-test-key-sequence "(^(x) x)"
-                            (kbd "(^(x) SPC x"))
-  (gauche-test-key-sequence "(f (g) h)"
-                            (kbd "(f(g) SPC h"))
+  (gauche-paredit-test-key-sequence
+   "(^(x) x)"
+   (kbd "(^(x) SPC x"))
+  (gauche-paredit-test-key-sequence
+   "(f (g) h)"
+   (kbd "(f(g) SPC h"))
   )
