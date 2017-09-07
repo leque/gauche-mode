@@ -102,6 +102,25 @@
                    1)))
     (lisp-indent-specform count state indent-point normal-indent)))
 
+(defun gauche-mode-indent-define-cfn/define-cproc
+    (state indent-point normal-indent)
+  (let ((count (condition-case nil
+                   (cl-block find-body
+                     (let ((n 2))
+                       (forward-sexp (+ n 1))
+                       (while t
+                         (let* ((sym (thing-at-point 'symbol t))
+                                (i (cond ((equal sym "::")
+                                          2)
+                                         ((string-prefix-p ":" sym)
+                                          1)
+                                         (t
+                                          (cl-return-from find-body n)))))
+                           (forward-sexp i)
+                           (cl-incf n i)))))
+                 (scan-error 3))))
+    (lisp-indent-specform count state indent-point normal-indent)))
+
 (defvar gauche-mode-posix-char-set-names
   '("alnum" "alpha" "blank" "cntrl" "digit" "graph"
     "lower" "print" "punct" "space" "upper" "xdigit"))
@@ -122,6 +141,8 @@
     (^_ nil t)
     (make 1 nil)
     (make-parameter 1 nil)
+    (define-cfn gauche-mode-indent-define-cfn/define-cproc t)
+    (define-cproc gauche-mode-indent-define-cfn/define-cproc t)
     ;; R6RS
     (call-with-bytevector-output-port 0 nil)
     (call-with-string-output-port 0 nil)

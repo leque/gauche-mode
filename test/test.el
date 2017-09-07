@@ -215,6 +215,45 @@
    |")
   )
 
+(ert-deftest gauche-mode-indent-define-cfn/define-cproc-test ()
+  (gauche-test-indent
+   "(define-cproc foo () ::<int> :constant
+   |1)
+   |"
+   "(define-cproc foo () ::<int> :constant
+   |  1)
+   |")
+  (gauche-test-indent
+   "(define-cproc foo ()
+   |::<int>
+   |:constant
+   |1)
+   |"
+   "(define-cproc foo ()
+   |              ::<int>
+   |              :constant
+   |  1)
+   |")
+  (gauche-test-indent
+   "(define-cfn foo () ::<int> :constant
+   |1)
+   |"
+   "(define-cfn foo () ::<int> :constant
+   |  1)
+   |")
+  (gauche-test-indent
+   "(define-cfn foo ()
+   |::<int>
+   |:constant
+   |1)
+   |"
+   "(define-cfn foo ()
+   |            ::<int>
+   |            :constant
+   |  1)
+   |")
+  )
+
 (ert-deftest gauche-mode-toggle-paren-type-test ()
   (should
    (equal "[a (b c) d]"

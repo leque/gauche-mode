@@ -150,6 +150,8 @@
      (f name 1 #t))
     ((':syntax (and name "quasirename") . _)
      (f name 1 #t))
+    ((':syntax (and name (or "define-cfn" "define-cproc")) . _)
+     (f name 'gauche-mode-indent-define-cfn/define-cproc #t))
     ((':syntax (and name (or "while" "until")) . _)
      (f name 'gauche-mode-indent-while/until #t))
     ((':syntax (and name
