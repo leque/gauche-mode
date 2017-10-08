@@ -84,21 +84,24 @@
 ;;  (define-condition-type condition-type ‌‌supertype constructor predicate field-spec1 ...)
 (defun gauche-mode-indent-define-condition-type
     (state indent-point normal-indent)
-  (let ((count (or (ignore-errors
-                     (forward-sexp 4)
-                     (and (thing-at-point 'symbol)
-                          4))
+  (let ((count (or (condition-case nil
+                       (progn
+                         (forward-sexp 4)
+                         (and (thing-at-point 'symbol)
+                              4))
+                     (scan-error nil))
                    3)))
     (lisp-indent-specform count state indent-point normal-indent)))
 
 (defun gauche-mode-indent-while/until (state indent-point normal-indent)
-  (let ((count (or (ignore-errors
-                     (cl-loop for n from 2 upto 4
-                              do (forward-sexp)
-                              when (and (> n 2)
-                                        (equal (thing-at-point 'symbol t) "=>"))
-                              return n
-                              finally return nil))
+  (let ((count (or (condition-case nil
+                       (cl-loop for n from 2 upto 4
+                                do (forward-sexp)
+                                when (and (> n 2)
+                                          (equal (thing-at-point 'symbol t) "=>"))
+                                return n
+                                finally return nil)
+                     (scan-error nil))
                    1)))
     (lisp-indent-specform count state indent-point normal-indent)))
 
@@ -310,12 +313,12 @@
         (unless (re-search-backward (rx "(export" symbol-end)
                                     nil t)
           (error "No export clause found."))
-        (let ((ep (ignore-errors
-                    (save-excursion
-                      (forward-sexp)
-                      (point)))))
-          (unless ep
-            (error "Unclosed export clause."))
+        (let ((ep (condition-case nil
+                      (save-excursion
+                        (forward-sexp)
+                        (point))
+                    (scan-error
+                     (error "Unclosed export clause.")))))
           (down-list)
           (cl-block nil
             (ignore-errors
@@ -430,10 +433,12 @@ but use macroexpand-1 instead."
         (insert a)
         (when at-open
           (backward-char dir))
-        (ignore-errors
-          (forward-sexp dir)
-          (backward-delete-char dir)
-          (insert b))))))
+        (condition-case nil
+            (progn
+              (forward-sexp dir)
+              (backward-delete-char dir)
+              (insert b))
+          (scan-error nil))))))
 
 (defun gauche-mode-toggle-paren-type ()
   "toggle parentheses and brackets"
