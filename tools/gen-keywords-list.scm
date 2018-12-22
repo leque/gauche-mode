@@ -1,5 +1,8 @@
 (use parser.peg)
 
+(define %spaces
+  ($->rope ($many ($. #[\s]))))
+
 (define %dots
   ($seq ($string "@dots{}")
         ($return '...)))
@@ -29,9 +32,9 @@
 
 (define %setter
   ($do (($string "{(setter "))
-       (spaces)
+       (%spaces)
        (sym %symbol)
-       (spaces)
+       (%spaces)
        (($string ")}"))
        ($return `(setter ,sym))))
 
@@ -50,14 +53,14 @@
 
 (define %exprs
   ($lazy
-   ($seq spaces ($sep-end-by %expr spaces))))
+   ($seq %spaces ($sep-end-by %expr %spaces))))
 
 (define %expr
   ($lazy
    ($or %list %opt %dots %dot %lambda-list-keyword %code %var %setter %symbol)))
 
 (define %spec
-  ($followed-by %exprs eof))
+  ($followed-by %exprs ($eos)))
 
 (define (parse-spec str)
   (guard (exc
