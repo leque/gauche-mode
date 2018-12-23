@@ -4,57 +4,65 @@
   ($->rope ($many ($. #[\s]))))
 
 (define %dots
-  ($seq ($string "@dots{}")
+  ($seq ($. "@dots{}")
         ($return '...)))
 
 (define %dot
-  ($string "."))
+  ($seq ($. ".")
+        ($return '|.|)))
 
 (define %lambda-list-keyword
   ($try
-   ($or ($seq ($string ":key")
+   ($or ($seq ($. ":key")
               ($return ':key))
-        ($seq ($string ":optional")
+        ($seq ($. ":optional")
               ($return ':optional)))))
 
 (define %symbol
   ($->string ($many1 ($none-of #[(){}\[\]\s]))))
 
 (define %code
-  ($between ($string "@code{")
+  ($between ($. "@code{")
             %symbol
-            ($char #\})))
+            ($. #\})))
 
 (define %var
-  ($between ($string "@var{")
+  ($between ($. "@var{")
             %symbol
-            ($char #\})))
+            ($. #\})))
 
 (define %setter
-  ($do (($string "{(setter "))
+  ($do (($. "{(setter "))
        (%spaces)
        (sym %symbol)
        (%spaces)
-       (($string ")}"))
+       (($. ")}"))
        ($return `(setter ,sym))))
 
 (define %list
   ($lazy
-   ($between ($char #\()
+   ($between ($. #\()
              %exprs
-             ($char #\)))))
+             ($. #\)))))
 
 (define %opt
   ($lazy
    ($lift (cut cons 'opt <>)
-          ($between ($char #\[)
+          ($between ($. #\[)
                     %exprs
-                    ($char #\])))))
+                    ($. #\])))))
 
 (define %exprs
   ($lazy
    ($seq %spaces ($sep-end-by %expr %spaces))))
 
+;; expr ::= (expr ...)            ; list
+;;        | ('opt expr ...)       ; opt
+;;        | '...                  ; dots
+;;        | '|.|                  ; dot
+;;        | (or ':key ':optinal)  ; lambda-list-keyword
+;;        | (? string?)           ; code, var, or symbol
+;;        | ('setter (? string?)) ; setter
 (define %expr
   ($lazy
    ($or %list %opt %dots %dot %lambda-list-keyword %code %var %setter %symbol)))
