@@ -8,8 +8,9 @@
         ($return '...)))
 
 (define %dot
-  ($seq ($. ".")
-        ($return '|.|)))
+  ($try
+   ($seq ($followed-by ($. ".") ($. #[\s]))
+         ($return '|.|))))
 
 (define %lambda-list-keyword
   ($try
