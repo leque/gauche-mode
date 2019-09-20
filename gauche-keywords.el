@@ -200,6 +200,7 @@
  (when 1 t)
  (while gauche-mode-indent-while/until t)
  (with-builder 1 t)
+ (with-cf-subst nil t)
  (with-character-attribute 2 nil)
  (with-dynamic-extent 1 nil)
  (with-error-handler 1 nil)
