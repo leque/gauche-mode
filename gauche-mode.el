@@ -156,21 +156,34 @@
     (with-syntax 1 nil)
     ))
 
+(defcustom gauche-mode-extra-keywords '()
+  "extra keywords for indentation/font-lock"
+  :type '(repeat
+          (list (symbol :tag "name of the keyword")
+                (choice nil
+                        (integer
+                         :tag "indent point for scheme-indent-function"))
+                (boolean
+                 :tag "highlight the keyword as font-lock-keyword or not")))
+  )
+
 (defun gauche-mode-keywords->font-lock-keyword (keywords)
-  `(,(rx-to-string
-      `(seq "("
-            (submatch-n
-             1
-             (or ,@(cl-loop
-                    for (name indent highlight?) in keywords
-                    when indent do (put name 'scheme-indent-function indent)
-                    when highlight? collect (symbol-name name))))
-            symbol-end))
-    1 font-lock-keyword-face))
+  (and
+   keywords
+   `((,(rx-to-string
+        `(seq "("
+              (submatch-n
+               1
+               (or ,@(cl-loop
+                      for (name indent highlight?) in keywords
+                      when indent do (put name 'scheme-indent-function indent)
+                      when highlight? collect (symbol-name name))))
+              symbol-end))
+      1 font-lock-keyword-face))))
 
 (defvar gauche-mode-font-lock-keywords
   (append
-   `(,(gauche-mode-keywords->font-lock-keyword gauche-mode-keywords)
+   `(,@(gauche-mode-keywords->font-lock-keyword gauche-mode-keywords)
      (,(rx "("
            (submatch-n
             1
@@ -284,7 +297,9 @@
   (setq scheme-program-name "gosh")
   (setq comment-start ";;")
   (setq font-lock-defaults
-        `(,gauche-mode-font-lock-keywords
+        `((,@(gauche-mode-keywords->font-lock-keyword
+              gauche-mode-extra-keywords)
+           ,@gauche-mode-font-lock-keywords)
           nil
           nil
           (("+-*/.<>=!?$%_&~^:" . "w"))
