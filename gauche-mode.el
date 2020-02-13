@@ -128,7 +128,7 @@
   '("alnum" "alpha" "blank" "cntrl" "digit" "graph"
     "lower" "print" "punct" "space" "upper" "xdigit"))
 
-(defvar gauche-keywords
+(defvar gauche-mode-keywords
   ;; ((name indent highlight?) ...)
   `(
     ,@(let ((src (concat (file-name-directory (or load-file-name
@@ -156,18 +156,21 @@
     (with-syntax 1 nil)
     ))
 
+(defun gauche-mode-keywords->font-lock-keyword (keywords)
+  `(,(rx-to-string
+      `(seq "("
+            (submatch-n
+             1
+             (or ,@(cl-loop
+                    for (name indent highlight?) in keywords
+                    when indent do (put name 'scheme-indent-function indent)
+                    when highlight? collect (symbol-name name))))
+            symbol-end))
+    1 font-lock-keyword-face))
+
 (defvar gauche-mode-font-lock-keywords
   (append
-   `((,(rx-to-string
-        `(seq "("
-              (submatch-n
-               1
-               (or ,@(cl-loop
-                      for (name indent highlight?) in gauche-keywords
-                      when indent do (put name 'scheme-indent-function indent)
-                      when highlight? collect (symbol-name name))))
-              symbol-end))
-      1 font-lock-keyword-face)
+   `(,(gauche-mode-keywords->font-lock-keyword gauche-mode-keywords)
      (,(rx "("
            (submatch-n
             1
