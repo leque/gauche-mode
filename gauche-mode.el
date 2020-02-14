@@ -168,18 +168,16 @@
   )
 
 (defun gauche-mode-keywords->font-lock-keyword (keywords)
-  (and
-   keywords
-   `((,(rx-to-string
-        `(seq "("
-              (submatch-n
-               1
-               (or ,@(cl-loop
-                      for (name indent highlight?) in keywords
-                      when indent do (put name 'scheme-indent-function indent)
-                      when highlight? collect (symbol-name name))))
-              symbol-end))
-      1 font-lock-keyword-face))))
+  (let ((ks (cl-loop
+             for (name indent highlight?) in keywords
+             when indent do (put name 'scheme-indent-function indent)
+             when highlight? collect (symbol-name name))))
+    (and ks
+         `((,(rx-to-string
+              `(seq "("
+                    (submatch-n 1 (or ,@ks))
+                    symbol-end))
+            1 font-lock-keyword-face)))))
 
 (defvar gauche-mode-font-lock-keywords
   (append
