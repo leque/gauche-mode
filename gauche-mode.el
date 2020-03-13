@@ -125,8 +125,12 @@
     (lisp-indent-specform count state indent-point normal-indent)))
 
 (defvar gauche-mode-posix-char-set-names
-  '("alnum" "alpha" "blank" "cntrl" "digit" "graph"
-    "lower" "print" "punct" "space" "upper" "xdigit"))
+  '(
+    "alnum" "alpha" "blank" "cntrl" "digit" "graph"
+    "lower" "print" "punct" "space" "upper" "xdigit"
+    "ALNUM" "ALPHA" "BLANK" "CNTRL" "DIGIT" "GRAPH"
+    "LOWER" "PRINT" "PUNCT" "SPACE" "UPPER" "XDIGIT"
+    ))
 
 (defvar gauche-mode-keywords
   ;; ((name indent highlight?) ...)
