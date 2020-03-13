@@ -1,6 +1,12 @@
 ;;; Generated from gauche-refe.texi. DO NOT EDIT
 (
  ($ nil t)
+ ($lazy nil t)
+ ($let 1 t)
+ ($let* 1 t)
+ ($match1 nil t)
+ ($match1* nil t)
+ ($parameterize 1 t)
  (%macroexpand nil t)
  (%macroexpand-1 nil t)
  (^ 1 t)
@@ -30,6 +36,7 @@
  (call-with-input-string 1 nil)
  (call-with-iterator 1 nil)
  (call-with-iterators 1 nil)
+ (call-with-output nil nil)
  (call-with-output-conversion 1 nil)
  (call-with-output-file 1 nil)
  (call-with-output-process 1 nil)
@@ -66,6 +73,7 @@
  (define-constant defun t)
  (define-dict-interface defun t)
  (define-generic defun t)
+ (define-hybrid-syntax defun t)
  (define-in-module defun t)
  (define-inline defun t)
  (define-library defun t)
