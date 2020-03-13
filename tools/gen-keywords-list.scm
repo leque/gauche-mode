@@ -9,7 +9,8 @@
 
 (define %dot
   ($try
-   ($seq ($followed-by ($. ".") ($. #[\s]))
+   ($seq ($. ".")
+         ($. #[\s])
          ($return '|.|))))
 
 (define %lambda-list-keyword
@@ -33,12 +34,12 @@
             ($. #\})))
 
 (define %setter
-  ($do (($. "{(setter "))
-       (%spaces)
-       (sym %symbol)
-       (%spaces)
-       (($. ")}"))
-       ($return `(setter ,sym))))
+  ($let ((($. "{(setter "))
+         (%spaces)
+         (sym %symbol)
+         (%spaces)
+         (($. ")}")))
+    ($return `(setter ,sym))))
 
 (define %list
   ($lazy
@@ -69,7 +70,7 @@
    ($or %list %opt %dots %dot %lambda-list-keyword %code %var %setter %symbol)))
 
 (define %spec
-  ($followed-by %exprs ($eos)))
+  ($seq0 %exprs ($eos)))
 
 (define (parse-spec str)
   (guard (exc
