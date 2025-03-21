@@ -221,13 +221,13 @@
 
 (defun gauche-syntax-propertize (beg end)
   (goto-char beg)
-  (scheme-syntax-propertize-sexp-comment (point) end)
+  (scheme-syntax-propertize-sexp-comment end)
   (funcall
    (syntax-propertize-rules
     ;; sexp comments
     ((rx (submatch "#") ";")
      (1 (prog1 "< cn"
-          (scheme-syntax-propertize-sexp-comment (point) end))))
+          (scheme-syntax-propertize-sexp-comment end))))
     ;; tokens that might be terminated by "#"
     ;; This avoids conflict with tokens start with "#". (e.g. "#\#//")
     ((rx (or (seq "#\\"
