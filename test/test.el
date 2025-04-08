@@ -41,59 +41,58 @@
                    (gauche-test-string expected)))))
 
 (ert-deftest gauche-mode-indent-define-record-type-test/r6rs ()
-  (gauche-with-temp-buffer
-      (gauche-test-string
-       "(define-record-type pare
-       |(fields kar kdr))
-       |")
-    (setq gauche-mode-define-record-type-syntax 'r6rs)
-    (goto-char (point-min))
-    (indent-sexp)
-    (should (equal (buffer-string)
-                   (gauche-test-string
-                    "(define-record-type pare
-                    |  (fields kar kdr))
-                    |")))
-    (setq gauche-mode-define-record-type-syntax 'srfi)
-    (goto-char (point-min))
-    (indent-sexp)
-    (should (equal (buffer-string)
-                   (gauche-test-string
-                    "(define-record-type pare
-                    |    (fields kar kdr))
-                    |")))))
+  (let ((gauche-mode-define-record-type-syntax 'r6rs))
+    (gauche-test-indent
+     "(define-record-type pare
+     |(fields kar kdr))
+     |"
+     "(define-record-type pare
+     |  (fields kar kdr))
+     |"
+     ))
+  (let ((gauche-mode-define-record-type-syntax 'srfi))
+    (gauche-test-indent
+     "(define-record-type pare
+     |(fields kar kdr))
+     |"
+     "(define-record-type pare
+     |    (fields kar kdr))
+     |"
+     ))
+  )
 
 (ert-deftest gauche-mode-indent-define-record-type-test/srfi ()
-  (gauche-with-temp-buffer
-      (gauche-test-string
-       "(define-record-type :pare
-       |(kons x y)
-       |pare?
-       |(x kar set-kar!)
-       |(y kdr))
-       |")
-    (setq gauche-mode-define-record-type-syntax 'r6rs)
-    (goto-char (point-min))
-    (indent-sexp)
-    (should (equal (buffer-string)
-                   (gauche-test-string
-                    "(define-record-type :pare
-                    |  (kons x y)
-                    |  pare?
-                    |  (x kar set-kar!)
-                    |  (y kdr))
-                    |")))
-    (setq gauche-mode-define-record-type-syntax 'srfi)
-    (goto-char (point-min))
-    (indent-sexp)
-    (should (equal (buffer-string)
-                   (gauche-test-string
-                    "(define-record-type :pare
-                    |    (kons x y)
-                    |    pare?
-                    |  (x kar set-kar!)
-                    |  (y kdr))
-                    |")))))
+  (let ((gauche-mode-define-record-type-syntax 'r6rs))
+    (gauche-test-indent
+     "(define-record-type :pare
+     |(kons x y)
+     |pare?
+     |(x kar set-kar!)
+     |(y kdr))
+     |"
+     "(define-record-type :pare
+     |  (kons x y)
+     |  pare?
+     |  (x kar set-kar!)
+     |  (y kdr))
+     |"
+     ))
+  (let ((gauche-mode-define-record-type-syntax 'srfi))
+    (gauche-test-indent
+     "(define-record-type :pare
+     |(kons x y)
+     |pare?
+     |(x kar set-kar!)
+     |(y kdr))
+     |"
+     "(define-record-type :pare
+     |    (kons x y)
+     |    pare?
+     |  (x kar set-kar!)
+     |  (y kdr))
+     |"
+     ))
+  )
 
 (ert-deftest gauche-mode-indent-define-condition-type-test ()
   (gauche-test-indent
@@ -303,7 +302,8 @@
           (gauche-with-temp-buffer "(a (b c) d"
             (goto-char 4)
             (gauche-mode-toggle-paren-type)
-            (buffer-string))))(should
+            (buffer-string))))
+  (should
    (equal "(a [b c d]"
           (gauche-with-temp-buffer "(a (b c d)"
             (goto-char 4)
