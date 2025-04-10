@@ -1,4 +1,4 @@
-# gauche-mode.el [![Build Status](https://travis-ci.org/leque/gauche-mode.svg?branch=master)](https://travis-ci.org/leque/gauche-mode)
+# gauche-mode.el ![Build Status](https://github.com/leque/gauche-mode/actions/workflows/test.yml/badge.svg?branch=master)
 
 An Emacs major mode for [Gauche Scheme Interpreter](http://practical-scheme.net/gauche/).
 
