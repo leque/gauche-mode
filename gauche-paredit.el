@@ -30,6 +30,21 @@
 (require 'paredit)
 (require 'gauche-mode)
 
+(defvar gauche-paredit-mode-map
+  (let ((map (make-sparse-keymap)))
+    (define-key map (kbd "/") #'gauche-paredit-slash)
+    (define-key map (kbd "[") #'gauche-paredit-open-square)
+    (define-key map (kbd "]") #'gauche-paredit-close-square)
+    map))
+
+;;;###autoload
+(define-minor-mode gauche-paredit-mode
+  "Minor-mode for Gauche-aware paredit"
+  :keymap gauche-paredit-mode-map
+  (setq-local paredit-space-for-delimiter-predicates
+              (list #'gauche-paredit-space-for-delimiter-p))
+  (paredit-mode (if gauche-paredit-mode +1 -1)))
+
 (defvar gauche-paredit-paren-prefix-pat
   (rx
    (or
@@ -45,7 +60,7 @@
 (defun gauche-paredit-space-for-delimiter-p (endp delimiter)
   (or endp
       (if (= (char-syntax delimiter) ?\()
-          (not (looking-back gauche-paredit-paren-prefix-pat))
+          (not (looking-back gauche-paredit-paren-prefix-pat nil))
         t)))
 
 (defun gauche-paredit-in-char-set-p ()
@@ -146,7 +161,7 @@ In the middle of a char-set, insert a backslash-escaped square bracket."
        (t
         (insert "\\]"))))))
 
-(defun gauche-paredit-around-forward-delete (f &optional argument &rest args)
+(defun gauche-paredit-around-forward-delete (f &optional argument &rest _args)
   "around advice for `paredit-forward-delete'.
 
 Handle forward deletion immediately before regexps and char-sets.
@@ -162,7 +177,7 @@ otherwise move forward into the expression."
               (not (paredit-in-string-p))
               (save-excursion
                 (forward-char)
-                (and paredit-in-string-p
+                (and (paredit-in-string-p)
                      (or (gauche-paredit--in-regexp-p0)
                          (gauche-paredit--in-char-set-p0)))))
          (cond ((save-excursion
@@ -176,7 +191,7 @@ otherwise move forward into the expression."
         (t
          (funcall f argument))))
 
-(defun gauche-paredit-around-backward-delete (f &optional argument &rest args)
+(defun gauche-paredit-around-backward-delete (f &optional argument &rest _args)
   "around advice for `paredit-backward-delete'.
 
 Handle backward deletion immediately after non-case-folding regexps.
@@ -329,21 +344,6 @@ Otherwise, simply delegate to `paredit-backward-delete-in-string'."
 
 (advice-add 'paredit-backward-delete-in-string
             :around #'gauche-paredit-around-backward-delete-in-string)
-
-(defvar gauche-paredit-mode-map
-  (let ((map (make-sparse-keymap)))
-    (define-key map (kbd "/") #'gauche-paredit-slash)
-    (define-key map (kbd "[") #'gauche-paredit-open-square)
-    (define-key map (kbd "]") #'gauche-paredit-close-square)
-    map))
-
-;;;###autoload
-(define-minor-mode gauche-paredit-mode
-  "Minor-mode for Gauche-aware paredit"
-  :keymap gauche-paredit-mode-map
-  (setq-local paredit-space-for-delimiter-predicates
-              (list #'gauche-paredit-space-for-delimiter-p))
-  (paredit-mode (if gauche-paredit-mode +1 -1)))
 
 ;;;###autoload
 (defun enable-gauche-paredit-mode ()

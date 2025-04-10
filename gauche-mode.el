@@ -49,7 +49,7 @@
 (defcustom gauche-mode-profiler-max-rows "#f"
   "max number of rows of profiler output"
   :type '(choice integer
-                 (const "#f" :tag "output all data"))
+                 (const :tag "output all data" "#f"))
   :group 'gauche-mode)
 
 (defcustom gauche-mode-pprint-procedure "write"
@@ -164,7 +164,7 @@
   "extra keywords for indentation/font-lock"
   :type '(repeat
           (list (symbol :tag "name of the keyword")
-                (choice nil
+                (choice (const nil)
                         (integer
                          :tag "indent point for scheme-indent-function"))
                 (boolean
@@ -462,7 +462,7 @@ but use macroexpand-1 instead."
         (condition-case nil
             (progn
               (forward-sexp dir)
-              (backward-delete-char dir)
+              (delete-char (- dir))
               (insert b))
           (scan-error nil))))))
 
