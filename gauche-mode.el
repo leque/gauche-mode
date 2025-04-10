@@ -6,6 +6,7 @@
 ;; Keywords: languages, lisp, gauche
 ;; URL: https://github.com/leque/gauche-mode
 ;; Version: 0.1.0
+;; Package-Requires: ((emacs "28.2") (compat "30.1.0.0"))
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -24,6 +25,7 @@
 
 ;;; Code:
 
+(require 'compat)
 (require 'cl-lib)
 (require 'scheme)
 (require 'cmuscheme)
@@ -220,8 +222,8 @@
    scheme-font-lock-keywords-2))
 
 (defun gauche-syntax-propertize-sexp-comment (end)
-  (if (and (>= emacs-major-version 30)
-           (>= emacs-minor-version 1))
+  (static-if (and (>= emacs-major-version 30)
+                  (>= emacs-minor-version 1))
       (scheme-syntax-propertize-sexp-comment end)
     (scheme-syntax-propertize-sexp-comment (point) end)))
 
