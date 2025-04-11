@@ -7,6 +7,7 @@ GOSH ?= gosh
 GAUCHE_SRC =
 GEN_KEYWORDS = tools/gen-keywords-list.scm
 ELC = gauche-mode.elc gauche-paredit.elc
+ERROR_ON_WARN ?= t
 
 .PHONY: test compile clean
 
@@ -19,6 +20,7 @@ compile: $(ELPA_DIR) $(ELC)
 
 .el.elc:
 	$(CASK) exec $(EMACS) -Q -batch $(LOADPATH) \
+		--eval '(setq byte-compile-error-on-warn $(ERROR_ON_WARN))' \
 		-f batch-byte-compile $<
 
 clean:
