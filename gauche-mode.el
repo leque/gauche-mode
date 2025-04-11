@@ -236,13 +236,17 @@
     ((rx (submatch "#") ";")
      (1 (prog1 "< cn"
           (gauche-syntax-propertize-sexp-comment end))))
-    ;; tokens that might be terminated by "#"
-    ;; This avoids conflict with tokens start with "#". (e.g. "#\#//")
+    ;; tokens ending with "#"
     ((rx (or (seq "#\\"
                   (or (1+ word)
                       anything))
              (seq "#" (1+ digit) "#")))
-     (0 nil))
+     ;; Skip propertize here and use the syntax property specified elsewhere,
+     ;; which resolves ambiguity by giving higher precedence to tokens ending with "#"
+     ;; rather than tokens beginning with "#".
+     ;; For example, in the sequence "#\#//", the propertizer will favor the token "#\#"
+     ;; (character literal, ends with '#') over "#//" (regexp literal, begins with '#').
+     )
     ;; regexps
     ((rx (submatch "#")
          "/"
