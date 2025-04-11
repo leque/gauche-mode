@@ -6,18 +6,23 @@ ELPA_DIR = \
 GOSH ?= gosh
 GAUCHE_SRC =
 GEN_KEYWORDS = tools/gen-keywords-list.scm
-ELS = gauche-mode.el gauche-paredit.el
+ELC = gauche-mode.elc gauche-paredit.elc
 
-.PHONY: test compile
+.PHONY: test compile clean
 
 test: $(ELPA_DIR)
 	$(CASK) exec $(EMACS) -Q -batch $(LOADPATH) \
 		-l test/test.el \
 		-f ert-run-tests-batch-and-exit
 
-compile: $(ELPA_DIR)
+compile: $(ELPA_DIR) $(ELC)
+
+.el.elc:
 	$(CASK) exec $(EMACS) -Q -batch $(LOADPATH) \
-		-f batch-byte-compile $(ELS)
+		-f batch-byte-compile $<
+
+clean:
+	rm -f $(ELC)
 
 $(ELPA_DIR): Cask
 	$(CASK) install
