@@ -241,7 +241,7 @@
                   (or (1+ word)
                       anything))
              (seq "#" (1+ digit) "#")))
-     ;; Skip propertize here and use the syntax property specified elsewhere,
+     ;; Skip propertization here and use the syntax property specified elsewhere,
      ;; which resolves ambiguity by giving higher precedence to tokens ending with "#"
      ;; rather than tokens beginning with "#".
      ;; For example, in the sequence "#\#//", the propertizer will favor the token "#\#"
