@@ -54,7 +54,7 @@
                  (const :tag "output all data" "#f"))
   :group 'gauche-mode)
 
-(defcustom gauche-mode-pprint-procedure "write"
+(defcustom gauche-mode-pprint-procedure "pprint"
   "pretty print procedure for output of macroexpand etc."
   :type 'string
   :group 'gauche-mode)
