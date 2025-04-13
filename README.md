@@ -4,7 +4,7 @@ An Emacs major mode for [Gauche Scheme Interpreter](http://practical-scheme.net/
 
 ## Requirements
 
-* Emacs 24.4 or later
+* Emacs 28.2 or later
 
 ## Installation
 
