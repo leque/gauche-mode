@@ -222,8 +222,8 @@
    scheme-font-lock-keywords-2))
 
 (defun gauche-syntax-propertize-sexp-comment (end)
-  (static-if (and (>= emacs-major-version 30)
-                  (>= emacs-minor-version 1))
+  (static-if (cl-destructuring-bind (min-arity . _)
+                 (func-arity #'scheme-syntax-propertize-sexp-comment) (= min-arity 1))
       (scheme-syntax-propertize-sexp-comment end)
     (scheme-syntax-propertize-sexp-comment (point) end)))
 
