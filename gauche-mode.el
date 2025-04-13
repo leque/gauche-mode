@@ -223,7 +223,8 @@
 
 (defun gauche-syntax-propertize-sexp-comment (end)
   (static-if (cl-destructuring-bind (min-arity . _)
-                 (func-arity #'scheme-syntax-propertize-sexp-comment) (= min-arity 1))
+                 (func-arity #'scheme-syntax-propertize-sexp-comment)
+               (= min-arity 1))
       (scheme-syntax-propertize-sexp-comment end)
     (scheme-syntax-propertize-sexp-comment (point) end)))
 
