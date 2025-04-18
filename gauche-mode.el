@@ -26,6 +26,8 @@
 ;;; Code:
 
 (require 'compat)
+(eval-when-compile
+  (require 'subr-x))
 (require 'cl-lib)
 (require 'scheme)
 (require 'cmuscheme)
@@ -126,7 +128,7 @@
                  (scan-error 3))))
     (lisp-indent-specform count state indent-point normal-indent)))
 
-(defvar gauche-mode-lambda-formal-keyword-regexp
+(defvar gauche-mode-lambda-formals-keyword-regexp
   (regexp-opt '(":optional"
                 ":key"
                 ":allow-other-keys"
@@ -141,26 +143,28 @@
     ("define-inline" . 0)
     ("define-in-module" . 1)))
 
+(defcustom gauche-mode-align-lambda-formals-keyword t
+  "Whether to vertically align lambda-formals keywords and parameters together."
+  :type 'boolean
+  :group 'gauche-mode)
+
 (defvar gauche-mode-lambda-like-form-regexp
   (regexp-opt (mapcar #'car gauche-mode-lambda-like-form-alist)
               'symbols))
 
-(defun gauche-mode-indent-function (indent-point state)
-  (let* ((open-paren-list (nth 9 state))
-         (len (length open-paren-list))
-         keypos)
-    (if (and (>= len 2)
-             ;; is inside lambda formal?
-             (save-excursion
-               (let ((i (- len 2)))
-                 ;; it may be higher-order define
-                 (while (and (>= i 0)
+(defun gauche-mode--indent-lambda-formals (indent-point state)
+  (when-let* ((gauche-mode-align-lambda-formals-keyword)
+              (
+               ;; indent-point exists inside of lambda-formals?
+               (save-excursion
+                 (and (named-let uplist ((parens (cdr (reverse (nth 9 state)))))
+                        (and parens
                              (progn
-                               (goto-char (1+ (nth i open-paren-list)))
-                               (parse-partial-sexp (point) calculate-lisp-indent-last-sexp 0 t)
-                               (looking-at-p "(")))
-                   (decf i))
-                 (and (>= i 0)
+                               (goto-char (1+ (car parens)))
+                               (skip-syntax-forward " ")
+                               (or (not (looking-at-p "("))
+                                   ;; higher-order define
+                                   (uplist (cdr parens))))))
                       (looking-at gauche-mode-lambda-like-form-regexp)
                       (let ((formspec (cdr
                                        (assoc (match-string 0)
@@ -171,39 +175,51 @@
                               (and (< (point) indent-point)
                                    (progn
                                      (forward-sexp)
-                                     (> (point) indent-point))))
+                                     (< indent-point (point)))))
                           (scan-error t))))))
-             ;; and is there lambda formal keyword at same level?
-             (save-excursion
-               (goto-char indent-point)
-               (condition-case nil
-                   (progn
-                     (while (not
-                             (looking-at-p
-                              gauche-mode-lambda-formal-keyword-regexp))
-                       (backward-sexp))
-                     (setq keypos (point))
-                     t)
-                 (scan-error nil))))
-        (if (save-excursion
-              (goto-char indent-point)
-              (skip-syntax-forward " ")
-              (looking-at-p gauche-mode-lambda-formal-keyword-regexp))
-            ;; the line starts lambda formal keyword
-            (progn
-              ;; indent to original indented column of next line of the keyword
-              (goto-char keypos)
-              (let ((lisp-indent-function #'scheme-indent-function))
-                (beginning-of-line 2)
-                (calculate-lisp-indent)))
-          ;; the line doesn't starts lambda formal keyword
-          (progn
-            ;; indent to next expression's column of the keyword
-            (goto-char keypos)
-            (forward-sexp)
-            (parse-partial-sexp (point) calculate-lisp-indent-last-sexp 0 t)
-            (current-column)))
-      (scheme-indent-function indent-point state))))
+              (key-pos
+               ;; find the position of the last lambda-formals keyword before indent-point
+               (save-excursion
+                 (goto-char (1- indent-point))
+                 (condition-case nil
+                     (progn
+                       (while (not
+                               (looking-at-p
+                                gauche-mode-lambda-formals-keyword-regexp))
+                         (backward-sexp))
+                       (point))
+                   (scan-error nil))))
+              (key-column (save-excursion
+                            (goto-char key-pos)
+                            (current-column))))
+    (cond
+     ;; the line starts with lambda-formals keyword
+     ;; <key-pos>
+     ;; <indent-point> <lambda-formals-keyword> ...
+     ((save-excursion
+        (goto-char indent-point)
+        (skip-syntax-forward " ")
+        (looking-at-p gauche-mode-lambda-formals-keyword-regexp))
+      key-column)
+     (t
+      (goto-char key-pos)
+      (forward-sexp)
+      (skip-syntax-forward " ")
+      (if (and (not (eolp))
+               (= (line-number-at-pos key-pos t) (line-number-at-pos nil t)))
+          ;; <key-pos> <other-expression>
+          ;; <indent-point> ...
+          (current-column)
+        ;; <key-pos>
+        ;; <other-expression>
+        ;; <indent-point> ...
+        key-column)))))
+
+(defun gauche-mode-indent-function (indent-point state)
+  (or
+   (gauche-mode--indent-lambda-formals indent-point state)
+   (scheme-indent-function indent-point state)
+   ))
 
 (defvar gauche-mode-posix-char-set-names
   '(
