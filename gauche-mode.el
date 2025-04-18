@@ -404,6 +404,7 @@
            . gauche-font-lock-syntactic-face-function)
           ))
   (setq-local syntax-propertize-function #'gauche-syntax-propertize)
+  (setq-local lisp-indent-function #'gauche-mode-indent-function)
   )
 
 (defun gauche-mode-last-sexp ()
