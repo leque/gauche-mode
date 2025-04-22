@@ -290,8 +290,8 @@
    |"
    "(lambda (x
    |         :key
-   |         (y 1)
-   |         (z 2))
+   |           (y 1)
+   |           (z 2))
    |  x)
    |")
   (gauche-test-indent

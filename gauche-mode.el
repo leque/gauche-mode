@@ -148,6 +148,11 @@
   :type 'boolean
   :group 'gauche-mode)
 
+(defcustom gauche-mode-lambda-formals-keyword-parameter-offset 2
+  "Offset for lambda-formals keyword parameters"
+  :type '(natnum)
+  :group 'gauche-mode)
+
 (defvar gauche-mode-lambda-like-form-regexp
   (regexp-opt (mapcar #'car gauche-mode-lambda-like-form-alist)
               'symbols))
@@ -213,7 +218,7 @@
         ;; <key-pos>
         ;; <other-expression>
         ;; <indent-point> ...
-        key-column)))))
+        (+ key-column gauche-mode-lambda-formals-keyword-parameter-offset))))))
 
 (defun gauche-mode-indent-function (indent-point state)
   (or
