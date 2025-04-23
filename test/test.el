@@ -294,6 +294,20 @@
    |           (z 2))
    |  x)
    |")
+  ;; It might be better that indentation is not affected by comments
+  (gauche-test-indent
+   "(lambda (x
+   |         :key ; comment
+   |         (y 1)
+   |         (z 2))
+   | x)
+   |"
+   "(lambda (x
+   |         :key ; comment
+   |              (y 1)
+   |              (z 2))
+   |  x)
+   |")
   (gauche-test-indent
    "(lambda (:key (x 1)
    |:optional (y 2))
