@@ -214,7 +214,7 @@
                  (forward-comment 1))
         nil)
       (if (and (not (eolp))
-               (= (line-number-at-pos key-pos t) (line-number-at-pos nil t)))
+               (save-excursion (not (re-search-backward "$" key-pos t))))
           ;; <key-pos> <other-expression>
           ;; <indent-point> ...
           (current-column)
