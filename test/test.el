@@ -316,6 +316,17 @@
    |         :optional (y 2))
    |  x)
    |")
+  ;; In the example below, `:rest` is currently aligned with `:key`,
+  ;; but it might be better to align `:rest` with `:optional` instead.
+  (gauche-test-indent
+   "(lambda (:optional x :key y
+   |:rest z)
+   | x)
+   |"
+   "(lambda (:optional x :key y
+   |                     :rest z)
+   |  x)
+   |")
   (gauche-test-indent
    "(lambda (:key (x 1)
    |:optional (y 2)
