@@ -165,7 +165,9 @@
                  (and (cl-loop for paren in (cdr (reverse (nth 9 state)))
                                thereis (progn
                                          (goto-char (1+ paren))
-                                         (skip-syntax-forward " ")
+                                         (while (or (cl-plusp (skip-syntax-forward " "))
+                                                    (forward-comment 1))
+                                           nil)
                                          (not (looking-at-p "("))))
                       (looking-at gauche-mode-lambda-like-form-regexp)
                       (let ((formspec (cdr
@@ -200,13 +202,17 @@
      ;; <indent-point> <lambda-formals-keyword> ...
      ((save-excursion
         (goto-char indent-point)
-        (skip-syntax-forward " ")
+        (while (or (cl-plusp (skip-syntax-forward " "))
+                   (forward-comment 1))
+          nil)
         (looking-at-p gauche-mode-lambda-formals-keyword-regexp))
       key-column)
      (t
       (goto-char key-pos)
       (forward-sexp)
-      (skip-syntax-forward " ")
+      (while (or (cl-plusp (skip-syntax-forward " "))
+                 (forward-comment 1))
+        nil)
       (if (and (not (eolp))
                (= (line-number-at-pos key-pos t) (line-number-at-pos nil t)))
           ;; <key-pos> <other-expression>

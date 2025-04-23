@@ -294,7 +294,6 @@
    |           (z 2))
    |  x)
    |")
-  ;; It might be better that indentation is not affected by comments
   (gauche-test-indent
    "(lambda (x
    |         :key ; comment
@@ -304,8 +303,8 @@
    |"
    "(lambda (x
    |         :key ; comment
-   |              (y 1)
-   |              (z 2))
+   |           (y 1)
+   |           (z 2))
    |  x)
    |")
   (gauche-test-indent
@@ -352,6 +351,17 @@
    | x)
    |"
    "(define ((foo x :key w) :key (y 1)
+   |                        :optional (z 2))
+   |  x)
+   |")
+  (gauche-test-indent
+   "(define (; comment
+   | (foo x :key w) :key (y 1)
+   |:optional (z 2))
+   | x)
+   |"
+   "(define (; comment
+   |         (foo x :key w) :key (y 1)
    |                        :optional (z 2))
    |  x)
    |")
