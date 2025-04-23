@@ -35,8 +35,7 @@
 (defun gauche-test-indent (input expected)
   (gauche-with-temp-buffer
       (gauche-test-string input)
-    (goto-char (point-min))
-    (indent-sexp)
+    (indent-region (point-min) (point-max))
     (should (equal (buffer-substring-no-properties (point-min) (point-max))
                    (gauche-test-string expected)))))
 
@@ -250,6 +249,145 @@
    |            ::<int>
    |            :constant
    |  1)
+   |")
+  )
+(ert-deftest gauche-mode-indent-lambda-formals ()
+  (gauche-test-indent
+   "(lambda (:key (x 1)
+   |         (y 2))
+   | x)
+   |"
+   "(lambda (:key (x 1)
+   |              (y 2))
+   |  x)
+   |")
+  (gauche-test-indent
+   "(lambda (x :key (y 1)
+   |         (z 2))
+   | x)
+   |"
+   "(lambda (x :key (y 1)
+   |                (z 2))
+   |  x)
+   |")
+  (gauche-test-indent
+   "(lambda (x
+   |         :key (y 1)
+   |         (z 2))
+   | x)
+   |"
+   "(lambda (x
+   |         :key (y 1)
+   |              (z 2))
+   |  x)
+   |")
+  (gauche-test-indent
+   "(lambda (x
+   |         :key
+   |         (y 1)
+   |         (z 2))
+   | x)
+   |"
+   "(lambda (x
+   |         :key
+   |           (y 1)
+   |           (z 2))
+   |  x)
+   |")
+  (gauche-test-indent
+   "(lambda (x
+   |         :key ; comment
+   |         (y 1)
+   |         (z 2))
+   | x)
+   |"
+   "(lambda (x
+   |         :key ; comment
+   |           (y 1)
+   |           (z 2))
+   |  x)
+   |")
+  (gauche-test-indent
+   "(lambda (:key (x 1)
+   |:optional (y 2))
+   | x)
+   |"
+   "(lambda (:key (x 1)
+   |         :optional (y 2))
+   |  x)
+   |")
+  ;; In the example below, `:rest` is currently aligned with `:key`,
+  ;; but it might be better to align `:rest` with `:optional` instead.
+  (gauche-test-indent
+   "(lambda (:optional x :key y
+   |:rest z)
+   | x)
+   |"
+   "(lambda (:optional x :key y
+   |                     :rest z)
+   |  x)
+   |")
+  (gauche-test-indent
+   "(lambda (:key (x 1)
+   |:optional (y 2)
+   |(z 3))
+   | x)
+   |"
+   "(lambda (:key (x 1)
+   |         :optional (y 2)
+   |                   (z 3))
+   |  x)
+   |")
+  (gauche-test-indent
+   "(lambda (x :key (y 1)
+   |:optional (z 2))
+   | x)
+   |"
+   "(lambda (x :key (y 1)
+   |           :optional (z 2))
+   |  x)
+   |")
+  (gauche-test-indent
+   "(define ((foo x) :key (y 1)
+   |:optional (z 2))
+   | x)
+   |"
+   "(define ((foo x) :key (y 1)
+   |                 :optional (z 2))
+   |  x)
+   |")
+  (gauche-test-indent
+   "(define ((foo x :key w) :key (y 1)
+   |:optional (z 2))
+   | x)
+   |"
+   "(define ((foo x :key w) :key (y 1)
+   |                        :optional (z 2))
+   |  x)
+   |")
+  (gauche-test-indent
+   "(define (; comment
+   | (foo x :key w) :key (y 1)
+   |:optional (z 2))
+   | x)
+   |"
+   "(define (; comment
+   |         (foo x :key w) :key (y 1)
+   |                        :optional (z 2))
+   |  x)
+   |")
+  (gauche-test-indent
+   "(define ((foo x
+   |:key w)
+   |:key (y 1)
+   |:optional (z 2))
+   | x)
+   |"
+   "(define ((foo x
+   |              :key w)
+   |         :key (y 1)
+   |         :optional (z 2))
+   |  x)
    |")
   )
 
