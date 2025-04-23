@@ -162,14 +162,11 @@
               (
                ;; indent-point exists inside of lambda-formals?
                (save-excursion
-                 (and (named-let uplist ((parens (cdr (reverse (nth 9 state)))))
-                        (and parens
-                             (progn
-                               (goto-char (1+ (car parens)))
-                               (skip-syntax-forward " ")
-                               (or (not (looking-at-p "("))
-                                   ;; higher-order define
-                                   (uplist (cdr parens))))))
+                 (and (cl-loop for paren in (cdr (reverse (nth 9 state)))
+                               thereis (progn
+                                         (goto-char (1+ paren))
+                                         (skip-syntax-forward " ")
+                                         (not (looking-at-p "("))))
                       (looking-at gauche-mode-lambda-like-form-regexp)
                       (let ((formspec (cdr
                                        (assoc (match-string 0)
