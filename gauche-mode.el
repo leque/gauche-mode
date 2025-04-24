@@ -128,20 +128,24 @@
                  (scan-error 3))))
     (lisp-indent-specform count state indent-point normal-indent)))
 
-(defvar gauche-mode-lambda-formals-keyword-regexp
+(defvar gauche-mode--lambda-formals-keyword-regexp
   (regexp-opt '(":optional"
                 ":key"
                 ":allow-other-keys"
                 ":rest")
               'symbols))
 
-(defvar gauche-mode-lambda-like-form-alist
+(defvar gauche-mode--lambda-like-form-alist
   '(("lambda" . 0)
     ("^" . 0)
     ("define" . 0)
     ("define-constant" . 0)
     ("define-inline" . 0)
     ("define-in-module" . 1)))
+
+(defvar gauche-mode--lambda-like-form-regexp
+  (regexp-opt (mapcar #'car gauche-mode--lambda-like-form-alist)
+              'symbols))
 
 (defcustom gauche-mode-align-lambda-formals-keyword t
   "Whether to vertically align lambda-formals keywords and parameters together."
@@ -152,10 +156,6 @@
   "Offset for lambda-formals keyword parameters"
   :type '(natnum)
   :group 'gauche-mode)
-
-(defvar gauche-mode-lambda-like-form-regexp
-  (regexp-opt (mapcar #'car gauche-mode-lambda-like-form-alist)
-              'symbols))
 
 (defun gauche-mode--indent-lambda-formals (indent-point state)
   (when-let* ((gauche-mode-align-lambda-formals-keyword)
@@ -169,10 +169,10 @@
                                                     (forward-comment 1))
                                            nil)
                                          (not (looking-at-p "("))))
-                      (looking-at gauche-mode-lambda-like-form-regexp)
+                      (looking-at gauche-mode--lambda-like-form-regexp)
                       (let ((formspec (cdr
                                        (assoc (match-string 0)
-                                              gauche-mode-lambda-like-form-alist))))
+                                              gauche-mode--lambda-like-form-alist))))
                         (condition-case nil
                             (progn
                               (forward-sexp (1+ formspec))
@@ -189,7 +189,7 @@
                      (progn
                        (while (not
                                (looking-at-p
-                                gauche-mode-lambda-formals-keyword-regexp))
+                                gauche-mode--lambda-formals-keyword-regexp))
                          (backward-sexp))
                        (point))
                    (scan-error nil))))
@@ -205,7 +205,7 @@
         (while (or (cl-plusp (skip-syntax-forward " "))
                    (forward-comment 1))
           nil)
-        (looking-at-p gauche-mode-lambda-formals-keyword-regexp))
+        (looking-at-p gauche-mode--lambda-formals-keyword-regexp))
       key-column)
      (t
       (goto-char key-pos)
