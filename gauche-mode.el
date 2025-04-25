@@ -136,12 +136,27 @@
               'symbols))
 
 (defvar gauche-mode--lambda-like-form-alist
-  '(("lambda" . 0)
-    ("^" . 0)
-    ("define" . 0)
-    ("define-constant" . 0)
-    ("define-inline" . 0)
-    ("define-in-module" . 1)))
+  '(("lambda" . 1)
+    ("^" . 1)
+    ("define" . 1)
+    ("define-constant" . 1)
+    ("define-inline" . 1)
+    ("define-in-module" . 2)
+    ("define-method" . gauche-mode--find-define-method-formals)))
+
+(defun gauche-mode--skip-comment&space ()
+  (while (or (cl-plusp (skip-syntax-forward " "))
+             (forward-comment 1))
+    nil))
+
+(defun gauche-mode--forward-sexp+comment (&optional n)
+  (forward-sexp (or n 1))
+  (gauche-mode--skip-comment&space))
+
+(defun gauche-mode--find-define-method-formals ()
+  (gauche-mode--forward-sexp+comment 2)
+  (while (looking-at-p ":")
+    (gauche-mode--forward-sexp+comment)))
 
 (defvar gauche-mode--lambda-like-form-regexp
   (regexp-opt (mapcar #'car gauche-mode--lambda-like-form-alist)
@@ -165,17 +180,17 @@
                  (and (cl-loop for paren in (cdr (reverse (nth 9 state)))
                                thereis (progn
                                          (goto-char (1+ paren))
-                                         (while (or (cl-plusp (skip-syntax-forward " "))
-                                                    (forward-comment 1))
-                                           nil)
+                                         (gauche-mode--skip-comment&space)
                                          (not (looking-at-p "("))))
                       (looking-at gauche-mode--lambda-like-form-regexp)
-                      (let ((formspec (cdr
-                                       (assoc (match-string 0)
-                                              gauche-mode--lambda-like-form-alist))))
+                      (let ((form-spec (cdr
+                                        (assoc (match-string 0)
+                                               gauche-mode--lambda-like-form-alist))))
                         (condition-case nil
                             (progn
-                              (forward-sexp (1+ formspec))
+                              (if (numberp form-spec)
+                                  (forward-sexp form-spec)
+                                (funcall form-spec))
                               (and (< (point) indent-point)
                                    (progn
                                      (forward-sexp)
@@ -202,17 +217,12 @@
      ;; <indent-point> <lambda-formals-keyword> ...
      ((save-excursion
         (goto-char indent-point)
-        (while (or (cl-plusp (skip-syntax-forward " "))
-                   (forward-comment 1))
-          nil)
+        (gauche-mode--skip-comment&space)
         (looking-at-p gauche-mode--lambda-formals-keyword-regexp))
       key-column)
      (t
       (goto-char key-pos)
-      (forward-sexp)
-      (while (or (cl-plusp (skip-syntax-forward " "))
-                 (forward-comment 1))
-        nil)
+      (gauche-mode--forward-sexp+comment)
       (if (and (not (eolp))
                (save-excursion (not (re-search-backward "$" key-pos t))))
           ;; <key-pos> <other-expression>
