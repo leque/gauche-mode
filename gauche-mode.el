@@ -144,12 +144,18 @@
     ("define-in-module" . 2)
     ("define-method" . gauche-mode--find-define-method-formals)))
 
+(defvar gauche-mode--lambda-like-form-regexp
+  (regexp-opt (mapcar #'car gauche-mode--lambda-like-form-alist)
+              'symbols))
+
 (defun gauche-mode--skip-comment&space ()
   (while (or (cl-plusp (skip-syntax-forward " "))
              (forward-comment 1))
     nil))
 
 (defun gauche-mode--forward-sexp+comment (&optional n)
+  "Move forward accross one sexp + trailing comments and whitespaces.
+With N, do it that many times."
   (forward-sexp (or n 1))
   (gauche-mode--skip-comment&space))
 
@@ -157,10 +163,6 @@
   (gauche-mode--forward-sexp+comment 2)
   (while (looking-at-p ":")
     (gauche-mode--forward-sexp+comment)))
-
-(defvar gauche-mode--lambda-like-form-regexp
-  (regexp-opt (mapcar #'car gauche-mode--lambda-like-form-alist)
-              'symbols))
 
 (defcustom gauche-mode-align-lambda-formals-keyword t
   "Whether to vertically align lambda-formals keywords and parameters together."
@@ -470,15 +472,13 @@
           (cl-block nil
             (ignore-errors
               (while (< (point) ep)
-                (forward-sexp)
-                (skip-syntax-forward " ")
+                (gauche-mode--forward-sexp+comment)
                 (let ((thing
                        (cond ((looking-at (rx "(rename" symbol-end))
                               (ignore-errors
                                 (save-excursion
                                   (down-list)
-                                  (forward-sexp 2)
-                                  (skip-syntax-forward " ")
+                                  (gauche-mode--forward-sexp+comment 2)
                                   (thing-at-point 'symbol))))
                              (t
                               (thing-at-point 'symbol)))))
