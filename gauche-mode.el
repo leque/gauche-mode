@@ -144,14 +144,19 @@
     ("define-in-module" . 2)
     ("define-method" . gauche-mode--find-define-method-formals)))
 
+(defun gauche-mode--skip-comment&space ()
+  (while (or (cl-plusp (skip-syntax-forward " "))
+             (forward-comment 1))
+    nil))
+
+(defun gauche-mode--forward-sexp+comment (&optional n)
+  (forward-sexp (or n 1))
+  (gauche-mode--skip-comment&space))
+
 (defun gauche-mode--find-define-method-formals ()
-  (forward-sexp 2)
-  (forward-comment 1)
-  (skip-syntax-forward " ")
+  (gauche-mode--forward-sexp+comment 2)
   (while (looking-at-p ":")
-    (forward-sexp)
-    (forward-comment 1)
-    (skip-syntax-forward " ")))
+    (gauche-mode--forward-sexp+comment)))
 
 (defvar gauche-mode--lambda-like-form-regexp
   (regexp-opt (mapcar #'car gauche-mode--lambda-like-form-alist)
@@ -175,9 +180,7 @@
                  (and (cl-loop for paren in (cdr (reverse (nth 9 state)))
                                thereis (progn
                                          (goto-char (1+ paren))
-                                         (while (or (cl-plusp (skip-syntax-forward " "))
-                                                    (forward-comment 1))
-                                           nil)
+                                         (gauche-mode--skip-comment&space)
                                          (not (looking-at-p "("))))
                       (looking-at gauche-mode--lambda-like-form-regexp)
                       (let ((form-spec (cdr
@@ -214,17 +217,12 @@
      ;; <indent-point> <lambda-formals-keyword> ...
      ((save-excursion
         (goto-char indent-point)
-        (while (or (cl-plusp (skip-syntax-forward " "))
-                   (forward-comment 1))
-          nil)
+        (gauche-mode--skip-comment&space)
         (looking-at-p gauche-mode--lambda-formals-keyword-regexp))
       key-column)
      (t
       (goto-char key-pos)
-      (forward-sexp)
-      (while (or (cl-plusp (skip-syntax-forward " "))
-                 (forward-comment 1))
-        nil)
+      (gauche-mode--forward-sexp+comment)
       (if (and (not (eolp))
                (save-excursion (not (re-search-backward "$" key-pos t))))
           ;; <key-pos> <other-expression>
