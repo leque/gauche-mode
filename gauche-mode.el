@@ -136,12 +136,22 @@
               'symbols))
 
 (defvar gauche-mode--lambda-like-form-alist
-  '(("lambda" . 0)
-    ("^" . 0)
-    ("define" . 0)
-    ("define-constant" . 0)
-    ("define-inline" . 0)
-    ("define-in-module" . 1)))
+  '(("lambda" . 1)
+    ("^" . 1)
+    ("define" . 1)
+    ("define-constant" . 1)
+    ("define-inline" . 1)
+    ("define-in-module" . 2)
+    ("define-method" . gauche-mode--find-define-method-formals)))
+
+(defun gauche-mode--find-define-method-formals ()
+  (forward-sexp 2)
+  (forward-comment 1)
+  (skip-syntax-forward " ")
+  (while (looking-at-p ":")
+    (forward-sexp)
+    (forward-comment 1)
+    (skip-syntax-forward " ")))
 
 (defvar gauche-mode--lambda-like-form-regexp
   (regexp-opt (mapcar #'car gauche-mode--lambda-like-form-alist)
@@ -170,12 +180,14 @@
                                            nil)
                                          (not (looking-at-p "("))))
                       (looking-at gauche-mode--lambda-like-form-regexp)
-                      (let ((formspec (cdr
-                                       (assoc (match-string 0)
-                                              gauche-mode--lambda-like-form-alist))))
+                      (let ((form-spec (cdr
+                                        (assoc (match-string 0)
+                                               gauche-mode--lambda-like-form-alist))))
                         (condition-case nil
                             (progn
-                              (forward-sexp (1+ formspec))
+                              (if (numberp form-spec)
+                                  (forward-sexp form-spec)
+                                (funcall form-spec))
                               (and (< (point) indent-point)
                                    (progn
                                      (forward-sexp)

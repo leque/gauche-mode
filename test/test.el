@@ -389,6 +389,39 @@
    |         :optional (z 2))
    |  x)
    |")
+  (gauche-test-indent
+   "(define-method dict-get ((m <empty-dict>)
+   |:optional
+   |default)
+   | default)
+   |"
+   "(define-method dict-get ((m <empty-dict>)
+   |                         :optional
+   |                           default)
+   |  default)
+   |")
+  (gauche-test-indent
+   "(define-method dict-get :locked ((m <empty-dict>)
+   |:optional
+   |default)
+   | default)
+   |"
+   "(define-method dict-get :locked ((m <empty-dict>)
+   |                                 :optional
+   |                                   default)
+   |  default)
+   |")
+  (gauche-test-indent
+   "(define-method #||# dict-get #||# :locked #||# ((m <empty-dict>)
+   |:optional
+   |default)
+   | default)
+   |"
+   "(define-method #||# dict-get #||# :locked #||# ((m <empty-dict>)
+   |                                                :optional
+   |                                                  default)
+   |  default)
+   |")
   )
 
 (ert-deftest gauche-mode-toggle-paren-type-test ()
