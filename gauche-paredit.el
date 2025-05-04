@@ -332,17 +332,46 @@ Otherwise, simply delegate to `paredit-backward-delete-in-string'."
                   (t
                    (apply f args))))))))))
 
-(advice-add 'paredit-forward-delete
-            :around #'gauche-paredit-around-forward-delete)
+(defun gauche-paredit-around-reindent-defun (f &rest args)
+  "around advice for `paredit-reindent-defun'.
 
-(advice-add 'paredit-backward-delete
-            :around #'gauche-paredit-around-backward-delete)
+A workaround for the issue where `gauche-mode--indent-lambda-formals'
+does not work well in combination with `indent-sexp'."
+  (if (or (not gauche-paredit-mode)
+          (paredit-in-string-p)
+          (paredit-in-comment-p))
+      (apply f args)
+    (save-excursion
+      (let ((ep (progn (end-of-defun) (point))))
+        (beginning-of-defun)
+        (indent-region (point) ep)))))
 
-(advice-add 'paredit-forward-delete-in-string
-            :around #'gauche-paredit-around-forward-delete-in-string)
+(defvar gauche-paredit--advices
+  `(
+    (paredit-forward-delete
+     :around
+     ,#'gauche-paredit-around-forward-delete)
+    (paredit-backward-delete
+     :around
+     ,#'gauche-paredit-around-backward-delete)
+    (paredit-forward-delete-in-string
+     :around
+     ,#'gauche-paredit-around-forward-delete-in-string)
+    (paredit-backward-delete-in-string
+     :around
+     ,#'gauche-paredit-around-backward-delete-in-string)
+    (paredit-reindent-defun
+     :around
+     ,#'gauche-paredit-around-reindent-defun)
+    ))
 
-(advice-add 'paredit-backward-delete-in-string
-            :around #'gauche-paredit-around-backward-delete-in-string)
+(defun gauche-paredit--setup-advices (enable)
+  (cl-loop for (sym how fun) in gauche-paredit--advices
+           do (if enable
+                  (advice-add sym how fun)
+                (advice-remove sym fun))))
+
+(gauche-paredit--setup-advices t)
 
 ;;;###autoload
 (defun enable-gauche-paredit-mode ()
