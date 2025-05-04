@@ -30,12 +30,11 @@
 (require 'paredit)
 (require 'gauche-mode)
 
-(defvar gauche-paredit-mode-map
-  (let ((map (make-sparse-keymap)))
-    (define-key map (kbd "/") #'gauche-paredit-slash)
-    (define-key map (kbd "[") #'gauche-paredit-open-square)
-    (define-key map (kbd "]") #'gauche-paredit-close-square)
-    map))
+(defvar-keymap gauche-paredit-mode-map
+  "/" #'gauche-paredit-slash
+  "[" #'gauche-paredit-open-square
+  "]" #'gauche-paredit-close-square
+  )
 
 ;;;###autoload
 (define-minor-mode gauche-paredit-mode
