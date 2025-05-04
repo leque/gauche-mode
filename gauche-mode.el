@@ -409,16 +409,15 @@ With N, do it that many times."
         font-lock-string-face)
     font-lock-comment-face))
 
-(defvar gauche-mode-map
-  (let ((map (make-sparse-keymap)))
-    (define-key map (kbd "C-c C-d") #'gauche-mode-toggle-debug-print)
-    (define-key map (kbd "C-c M-x") #'gauche-mode-export-current-symbol)
-    (define-key map (kbd "C-c M-d") #'gauche-mode-disassemble)
-    (define-key map (kbd "C-c M-m") #'gauche-mode-macroexpand)
-    (define-key map (kbd "C-c C-m") #'gauche-mode-macroexpand-1)
-    (define-key map (kbd "C-c C-p") #'gauche-mode-profile-last-sexp)
-    (define-key map (kbd "C-c   ;") #'gauche-mode-toggle-datum-comment)
-    map))
+(defvar-keymap gauche-mode-map
+  "C-c C-d" #'gauche-mode-toggle-debug-print
+  "C-c M-x" #'gauche-mode-export-current-symbol
+  "C-c M-d" #'gauche-mode-disassemble
+  "C-c M-m" #'gauche-mode-macroexpand
+  "C-c C-m" #'gauche-mode-macroexpand-1
+  "C-c C-p" #'gauche-mode-profile-last-sexp
+  "C-c ;"   #'gauche-mode-toggle-datum-comment
+  )
 
 ;;;###autoload
 (define-derived-mode gauche-mode scheme-mode
