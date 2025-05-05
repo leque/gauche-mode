@@ -79,10 +79,10 @@
       (cl-case (char-syntax delimiter)
         ((?\()
          (and (not (looking-back gauche-paredit-paren-prefix-pat nil))
-              (not (looking-back gauche-paredit-datum-prefix-pat))))
+              (not (looking-back gauche-paredit-datum-prefix-pat nil))))
         ((?\")
          (and (not (looking-back gauche-paredit-string-prefix-pat nil))
-              (not (looking-back gauche-paredit-datum-prefix-pat))))
+              (not (looking-back gauche-paredit-datum-prefix-pat nil))))
         (otherwise
          t))))
 
