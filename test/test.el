@@ -497,17 +497,48 @@
     (execute-kbd-macro (kbd "DEL"))
     (should (equal (buffer-string) "#/a/"))))
 
+(ert-deftest gauche-paredit-string-prefix-test ()
+  (gauche-paredit-test-key-sequence
+   "#\"\""
+   (kbd "# \""))
+  (gauche-paredit-test-key-sequence
+   "#*\"\""
+   (kbd "# * \""))
+  (gauche-paredit-test-key-sequence
+   "#**\"\""
+   (kbd "# * * \""))
+  )
+
 (ert-deftest gauche-paredit-datum-label-prefix-test ()
   (dotimes (_ 100)
     (let ((n (random 1000)))
       (gauche-paredit-test-key-sequence
        (format "#%s=()" n)
-       (kbd (format "# %s = (" n))))))
+       (kbd (format "# %s = (" n)))
+      (gauche-paredit-test-key-sequence
+       (format "#%s=\"\"" n)
+       (kbd (format "# %s = \"" n))))))
 
 (ert-deftest gauche-paredit-debug-print-prefix-test ()
   (gauche-paredit-test-key-sequence
    "#?=()"
-   (kbd "# ? = (")))
+   (kbd "# ? = ("))
+  (gauche-paredit-test-key-sequence
+   "#?=\"\""
+   (kbd "# ? = \""))
+  (gauche-paredit-test-key-sequence
+   "#?=x"
+   (kbd "# ? = x"))
+  (gauche-paredit-test-key-sequence
+   "#??=()"
+   (kbd "# ? ? = ("))
+  (gauche-paredit-test-key-sequence
+   "#??=\"\""
+   (kbd "# ? ? = \""))
+  (gauche-paredit-test-key-sequence
+   "#??=x"
+   (kbd "# ? ? = x"))
+  )
 
 (ert-deftest gauche-paredit-vector-prefix-test ()
   (gauche-paredit-test-key-sequence

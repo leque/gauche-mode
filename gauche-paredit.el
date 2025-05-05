@@ -44,23 +44,47 @@
               (list #'gauche-paredit-space-for-delimiter-p))
   (paredit-mode (if gauche-paredit-mode +1 -1)))
 
+(defvar gauche-paredit-datum-prefix-pat
+  (rx
+   (or
+    (seq "#" (+ digit) "=")               ; R7RS datum labels
+    "#?="                                 ; debug-print
+    "#??="                                ; debug-print-conditionally
+    ;; NB: "," is already marked as a prefix in the syntax table
+    ;; "#??,"                             ; debug-funcall-conditionally
+    )))
+
+(defvar gauche-paredit-string-prefix-pat
+  (rx
+   (or
+    ;; NB "#" is already marked as a prefix in the syntax table
+    ;; "#"                                ; string interpolation
+    "#*"                                  ; bit-vector
+    "#**"                                 ; incomplete-string
+    )))
+
 (defvar gauche-paredit-paren-prefix-pat
   (rx
    (or
-    (seq "#" (+ digit) "=")                      ; R7RS datum labels
     (seq "#" (any "su") (or "8" "16" "32" "64")) ; R7RS bytevectors + SRFI-4
-    (seq "#" (any "f") (or "16" "32" "64"))      ; SRFI-4 + Gauche's extension
-    "#vu8"                                       ; R6RS bytevectors
-    "(^"                                         ; (^(x y) ...)
-    "#?,"                                        ; debug-funcall
-    "#?="                                        ; debug-print
+    (seq "#" (any "f") (or "16" "32" "64")) ; SRFI-4 + Gauche's extension
+    "#vu8"                                  ; R6RS bytevectors
+    "(^"                                    ; (^(x y) ...)
+    ;; NB "," is already marked as a prefix in the syntax table
+    ;; "#?,"                                ; debug-funcall
     )))
 
 (defun gauche-paredit-space-for-delimiter-p (endp delimiter)
   (or endp
-      (if (= (char-syntax delimiter) ?\()
-          (not (looking-back gauche-paredit-paren-prefix-pat nil))
-        t)))
+      (cl-case (char-syntax delimiter)
+        ((?\()
+         (and (not (looking-back gauche-paredit-paren-prefix-pat nil))
+              (not (looking-back gauche-paredit-datum-prefix-pat))))
+        ((?\")
+         (and (not (looking-back gauche-paredit-string-prefix-pat nil))
+              (not (looking-back gauche-paredit-datum-prefix-pat))))
+        (otherwise
+         t))))
 
 (defun gauche-paredit-in-char-set-p ()
   "True if the parse state within a char-set literal"
