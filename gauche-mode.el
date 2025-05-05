@@ -365,6 +365,15 @@ With N, do it that many times."
      ;; For example, in the sequence "#\#//", the propertizer will favor the token "#\#"
      ;; (character literal, ends with '#') over "#//" (regexp literal, begins with '#').
      )
+    ;; quoted uninterned symbol prefix. #:|i|
+    ((rx (submatch "#:") "|")
+     (1 "'"))
+    ;; quoted keyword symbol prefix. :|i|
+    ((rx (seq symbol-start
+              (submatch ":")
+              "|"
+              ))
+     (1 "'"))
     ;; regexps
     ((rx (submatch "#")
          "/"
