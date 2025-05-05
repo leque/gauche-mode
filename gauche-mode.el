@@ -330,6 +330,8 @@ With N, do it that many times."
       0 font-lock-preprocessor-face t)
      (,(rx (or "#?,"
                "#?="
+               "#??,"
+               "#??="
                (seq "#" (1+ digit) (or "#" "="))))
       0 font-lock-preprocessor-face)
      )
