@@ -13,8 +13,8 @@ ERROR_ON_WARN ?= t
 
 test: $(ELPA_DIR)
 	$(CASK) exec $(EMACS) -Q -batch $(LOADPATH) \
-		-l test/test.el \
-		-f ert-run-tests-batch-and-exit
+		-l buttercup.el \
+		-f buttercup-run-discover
 
 compile: $(ELPA_DIR) $(ELC)
 
