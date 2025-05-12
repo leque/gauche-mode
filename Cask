@@ -5,3 +5,7 @@
 
 (depends-on "compat")
 (depends-on "paredit")
+
+(development
+ (depends-on "assess")
+ (depends-on "buttercup"))
