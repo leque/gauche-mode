@@ -175,14 +175,14 @@
   x)
 "
      :to-roundtrip-indentation-equal))
-  (it "indents lambda with ordinary and keyword parameters"
+  (it "indents lambda with required and keyword parameters"
     (expect "\
 (lambda (x :key (y 1)
                 (z 2))
   x)
 "
      :to-roundtrip-indentation-equal))
-  (it "indents lambda with ordinary and keyword parameters (newline before `:key`)"
+  (it "indents lambda with required and keyword parameters (newline before `:key`)"
     (expect "\
 (lambda (x
          :key (y 1)
@@ -190,7 +190,7 @@
   x)
 "
      :to-roundtrip-indentation-equal))
-  (it "indents lambda with ordinary and keyword parameters (newline before each keyword parameters)"
+  (it "indents lambda with required and keyword parameters (newline before each keyword parameters)"
     (expect "\
 (lambda (x
          :key
@@ -199,7 +199,7 @@
   x)
 "
      :to-roundtrip-indentation-equal))
-  (it "indents lambda with ordinary and keyword parameters (with comments in the middle of parameters)"
+  (it "indents lambda with required and keyword parameters (with comments in the middle of parameters)"
     (expect "\
 (lambda (x
          :key ; comment
@@ -232,7 +232,7 @@
   x)
 "
      :to-roundtrip-indentation-equal))
-  (it "indents lambda with ordinary, keyword, and optional parameters"
+  (it "indents lambda with required, keyword, and optional parameters"
     (expect "\
 (lambda (x :key (y 1)
            :optional (z 2))
