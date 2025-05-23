@@ -1,6 +1,8 @@
 ;;; -*- lexical-binding: t; -*-
 (require 'assess)
 
+(setq-default indent-tabs-mode nil)
+
 (defmacro gauche-with-temp-buffer (contents &rest body)
   (declare (indent 1))
   `(save-window-excursion

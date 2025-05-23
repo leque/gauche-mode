@@ -6,31 +6,24 @@
                                        (buffer-file-name)))
               "utils.el"))
 
-;; suppress `Matching: ...' output
-(setq blink-matching-paren nil)
-(setq-default indent-tabs-mode nil)
-
 (describe "gauche-mode-indent-define-record-type"
   (it "indents R6RS define-record-type (gauche-mode-define-record-type-syntax = r6rs)"
     (let ((gauche-mode-define-record-type-syntax 'r6rs))
-      (expect
-       "\
+      (expect "\
 (define-record-type pare
   (fields kar kdr))
 "
        :to-roundtrip-indentation-equal)))
   (it "indents R6RS define-record-type (gauche-mode-define-record-type-syntax = srfi)"
     (let ((gauche-mode-define-record-type-syntax 'srfi))
-      (expect
-       "\
+      (expect "\
 (define-record-type pare
     (fields kar kdr))
 "
        :to-roundtrip-indentation-equal)))
   (it "indents SRFI define-record-type (gauche-mode-define-record-type-syntax = r6rs)"
     (let ((gauche-mode-define-record-type-syntax 'r6rs))
-      (expect
-       "\
+      (expect "\
 (define-record-type :pare
   (kons x y)
   pare?
@@ -40,8 +33,7 @@
        :to-roundtrip-indentation-equal)))
   (it "indents SRFI define-record-type (gauche-mode-define-record-type-syntax = srfi)"
     (let ((gauche-mode-define-record-type-syntax 'srfi))
-      (expect
-       "\
+      (expect "\
 (define-record-type :pare
     (kons x y)
     pare?
@@ -53,16 +45,14 @@
 
 (describe "gauche-mode-indent-define-condition-type"
   (it "indents SRFI-35 define-record-type (newline before predicate)"
-    (expect
-     "\
+    (expect "\
 (define-condition-type &c &condition
                        c?
   (x c-x))
 "
      :to-roundtrip-indentation-equal))
   (it "indents SRFI-35 define-record-type (newline before supertype)"
-    (expect
-     "\
+    (expect "\
 (define-condition-type &c
     &condition
     c?
@@ -70,16 +60,14 @@
 "
      :to-roundtrip-indentation-equal))
   (it "indents R6RS define-record-type (newline before constructor)"
-    (expect
-     "\
+    (expect "\
 (define-condition-type &c &condition
                        make-c c?
   (x c-x))
 "
      :to-roundtrip-indentation-equal))
   (it "indents R6RS define-record-type (newline before supertype)"
-    (expect
-     "\
+    (expect "\
 (define-condition-type &c
     &condition
     make-c
@@ -91,38 +79,33 @@
 
 (describe "gauche-mode-indent-while/until"
   (it "indents while"
-    (expect
-     "\
+    (expect "\
 (while expr
   body)
 "
      :to-roundtrip-indentation-equal))
   (it "indents while without body"
-    (expect
-     "\
+    (expect "\
 (while expr
   )
 "
      :to-roundtrip-indentation-equal))
   (it "indents while (newline before condition)"
-    (expect
-     "\
+    (expect "\
 (while
     expr
   )
 "
      :to-roundtrip-indentation-equal))
   (it "indents while with `=> var`"
-    (expect
-     "\
+    (expect "\
 (while expr
     => var
   body)
 "
      :to-roundtrip-indentation-equal))
   (it "indents while with guard"
-    (expect
-     "\
+    (expect "\
 (while expr
     guard
     => var
@@ -130,23 +113,20 @@
 "
      :to-roundtrip-indentation-equal))
   (it "indents while with guard (newline before `=>`)"
-    (expect
-     "\
+    (expect "\
 (while expr guard
        => var
   body)
 "
      :to-roundtrip-indentation-equal))
   (it "indents while (expr = `=>`)"
-    (expect
-     "\
+    (expect "\
 (while =>
   body)
 "
      :to-roundtrip-indentation-equal))
   (it "indents while (`=>` in body)"
-    (expect
-     "\
+    (expect "\
 (while expr
   e1
   e2
@@ -158,15 +138,13 @@
 
 (describe "gauche-mode-indent-define-cfn/define-cproc"
   (it "indents define-cproc"
-    (expect
-     "\
+    (expect "\
 (define-cproc foo () ::<int> :constant
   1)
 "
      :to-roundtrip-indentation-equal))
   (it "indents define-cproc (newline before ret-type)"
-    (expect
-     "\
+    (expect "\
 (define-cproc foo ()
               ::<int>
               :constant
@@ -174,15 +152,13 @@
 "
      :to-roundtrip-indentation-equal))
   (it "indents define-cfn"
-    (expect
-     "\
+    (expect "\
 (define-cfn foo () ::<int> :constant
   1)
 "
      :to-roundtrip-indentation-equal))
   (it "indents define-cfn (newline before ret-type)"
-    (expect
-     "\
+    (expect "\
 (define-cfn foo ()
             ::<int>
             :constant
@@ -193,24 +169,21 @@
 
 (describe "gauche-mode-indent-lambda-formals"
   (it "indents lambda with keyword parameters only"
-    (expect
-     "\
+    (expect "\
 (lambda (:key (x 1)
               (y 2))
   x)
 "
      :to-roundtrip-indentation-equal))
   (it "indents lambda with ordinary and keyword parameters"
-    (expect
-     "\
+    (expect "\
 (lambda (x :key (y 1)
                 (z 2))
   x)
 "
      :to-roundtrip-indentation-equal))
   (it "indents lambda with ordinary and keyword parameters (newline before `:key`)"
-    (expect
-     "\
+    (expect "\
 (lambda (x
          :key (y 1)
               (z 2))
@@ -218,8 +191,7 @@
 "
      :to-roundtrip-indentation-equal))
   (it "indents lambda with ordinary and keyword parameters (newline before each keyword parameters)"
-    (expect
-     "\
+    (expect "\
 (lambda (x
          :key
            (y 1)
@@ -228,8 +200,7 @@
 "
      :to-roundtrip-indentation-equal))
   (it "indents lambda with ordinary and keyword parameters (with comments in the middle of parameters)"
-    (expect
-     "\
+    (expect "\
 (lambda (x
          :key ; comment
            (y 1)
@@ -238,8 +209,7 @@
 "
      :to-roundtrip-indentation-equal))
   (it "indents lambda with keyword and optional parameters"
-    (expect
-     "\
+    (expect "\
 (lambda (:key (x 1)
          :optional (y 2))
   x)
@@ -248,16 +218,14 @@
   ;; In the example below, `:rest` is currently aligned with `:key`,
   ;; but it might be better to align `:rest` with `:optional` instead.
   (it "indents lambda with optional, keyword, and rest parameters (optional and keyword parameters are placed in the same line)"
-    (expect
-     "\
+    (expect "\
 (lambda (:optional x :key y
                      :rest z)
   x)
 "
      :to-roundtrip-indentation-equal))
   (it "indents lambda with keyword and optional parameters (multiple optional parameters)"
-    (expect
-     "\
+    (expect "\
 (lambda (:key (x 1)
          :optional (y 2)
                    (z 3))
@@ -265,32 +233,28 @@
 "
      :to-roundtrip-indentation-equal))
   (it "indents lambda with ordinary, keyword, and optional parameters"
-    (expect
-     "\
+    (expect "\
 (lambda (x :key (y 1)
            :optional (z 2))
   x)
 "
      :to-roundtrip-indentation-equal))
   (it "indents higher-order define with keyword and optional parameters (mixed)"
-    (expect
-     "\
+    (expect "\
 (define ((foo x) :key (y 1)
                  :optional (z 2))
   x)
 "
      :to-roundtrip-indentation-equal))
   (it "indents higher-order define with keyword and optional parameters"
-    (expect
-     "\
+    (expect "\
 (define ((foo x :key w) :key (y 1)
                         :optional (z 2))
   x)
 "
      :to-roundtrip-indentation-equal))
   (it "indents higher-order define with keyword and optional parameters (with comments)"
-    (expect
-     "\
+    (expect "\
 (define (; comment
          (foo x :key w) :key (y 1)
                         :optional (z 2))
@@ -298,8 +262,7 @@
 "
      :to-roundtrip-indentation-equal))
   (it "indents higher-order define with keyword and optional parameters (multi-line)"
-    (expect
-     "\
+    (expect "\
 (define ((foo x
               :key w)
          :key (y 1)
@@ -308,8 +271,7 @@
 "
      :to-roundtrip-indentation-equal))
   (it "indents define-method with optional parameters"
-    (expect
-     "\
+    (expect "\
 (define-method dict-get ((m <empty-dict>)
                          :optional
                            default)
@@ -317,8 +279,7 @@
 "
      :to-roundtrip-indentation-equal))
   (it "indents define-method with optional parameters and qualifier"
-    (expect
-     "\
+    (expect "\
 (define-method dict-get :locked ((m <empty-dict>)
                                  :optional
                                    default)
@@ -326,8 +287,7 @@
 "
      :to-roundtrip-indentation-equal))
   (it "indents define-method with optional parameters (+block comments)"
-    (expect
-     "\
+    (expect "\
 (define-method #||# dict-get #||# :locked #||# ((m <empty-dict>)
                                                 :optional
                                                   default)
