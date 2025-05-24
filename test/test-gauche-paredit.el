@@ -8,28 +8,22 @@
 
 (describe "gauche-paredit-slash"
   (it "automatically inserts close `/` for `#/`"
-    (gauche-with-temp-buffer ""
-      (enable-gauche-paredit-mode)
-      (execute-kbd-macro (kbd "#/"))
-      (expect (buffer-string)
-              :to-equal "#//")))
+    (gauche-paredit-test-key-sequence
+     "#//"
+     (kbd "#/")))
   (it "deletes `#//` with DEL"
-    (gauche-with-temp-buffer "#//"
+    (gauche-with-temp-buffer "#//" ()
       (enable-gauche-paredit-mode)
-      (font-lock-fontify-buffer)
       (execute-kbd-macro (kbd "DEL"))
       (expect (buffer-string)
               :to-equal "")))
   (it "automatically inserts close `/` for `#/` (non-empty case)"
-    (gauche-with-temp-buffer ""
-      (enable-gauche-paredit-mode)
-      (execute-kbd-macro (kbd "#/a"))
-      (expect (buffer-string)
-              :to-equal "#/a/")))
+    (gauche-paredit-test-key-sequence
+     "#/a/"
+     (kbd "#/a")))
   (it "prevents deleting non-empty regexp with DEL"
-    (gauche-with-temp-buffer "#/a/"
+    (gauche-with-temp-buffer "#/a/" ()
       (enable-gauche-paredit-mode)
-      (font-lock-fontify-buffer)
       (execute-kbd-macro (kbd "DEL"))
       (expect (buffer-string)
               :to-equal "#/a/")))
