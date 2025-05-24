@@ -40,3 +40,21 @@
 (put 'gauche-indentation= 'ert-explainer 'gauche-explain-indentation=)
 
 (buttercup-define-matcher-for-unary-function :to-roundtrip-indentation-equal gauche-indentation=)
+
+(defun gauche--parse-pat&faces (pat&faces)
+  (cl-loop for (pat face) in pat&faces
+           collect pat into pats
+           collect face into faces
+           finally return (list pats faces)))
+
+(defun gauche-face-at= (text pat&faces)
+  (cl-destructuring-bind (pats faces) (gauche--parse-pat&faces pat&faces)
+    (assess-face-at= text 'gauche-mode pats faces)))
+
+(defun gauche-explain-face-at= (text pat&faces)
+  (cl-destructuring-bind (pats faces) (gauche--parse-pat&faces pat&faces)
+    (assess-explain-face-at= text 'gauche-mode pats faces)))
+
+(put 'gauche-face-at= 'ert-explainer 'gauche-explain-face-at=)
+
+(buttercup-define-matcher-for-binary-function :to-be-font-locked-as gauche-face-at=)
