@@ -298,58 +298,57 @@
 
 (describe "gauche-mode-toggle-paren-type"
   (it "toggles [] to ()"
-    (expect (gauche-with-temp-buffer "(a (b c) d)"
+    (expect (gauche-with-temp-buffer "|(a (b c) d)"
+                (:point-at "|")
               (goto-char (point-min))
               (gauche-mode-toggle-paren-type)
               (buffer-string))
             :to-equal "[a (b c) d]"))
   (it "toggles () to []"
-    (expect (gauche-with-temp-buffer "[a (b c) d]"
-              (goto-char (point-min))
+    (expect (gauche-with-temp-buffer "|[a (b c) d]"
+                (:point-at "|")
               (gauche-mode-toggle-paren-type)
               (buffer-string))
             :to-equal "(a (b c) d)"))
   (it "toggles [] to () (nested case)"
-    (expect (gauche-with-temp-buffer "(a (b c) d)"
-              (goto-char 4)
+    (expect (gauche-with-temp-buffer "(a |(b c) d)"
+                (:point-at "|")
               (gauche-mode-toggle-paren-type)
               (buffer-string))
             :to-equal "(a [b c] d)"))
   (it "toggles [] to () (nested case. point at close bracket)"
-    (expect (gauche-with-temp-buffer "(a (b c) d)"
-              (goto-char 8)
+    (expect (gauche-with-temp-buffer "(a (b c|) d)"
+                (:point-at "|")
               (gauche-mode-toggle-paren-type)
               (buffer-string))
             :to-equal "(a [b c] d)"))
   (it "toggles () to [] (point at close paren)"
-    (expect (gauche-with-temp-buffer "[a (b c) d]"
-              (goto-char (point-max))
-              (backward-char 1)
+    (expect (gauche-with-temp-buffer "[a (b c) d|]"
+                (:point-at "|")
               (gauche-mode-toggle-paren-type)
               (buffer-string))
             :to-equal "(a (b c) d)"))
   (it "toggles [] to () (point at close bracket)"
-    (expect (gauche-with-temp-buffer "(a (b c) d)"
-              (goto-char (point-max))
-              (backward-char 1)
+    (expect (gauche-with-temp-buffer "(a (b c) d|)"
+                (:point-at "|")
               (gauche-mode-toggle-paren-type)
               (buffer-string))
             :to-equal "[a (b c) d]"))
   (it "toggles [] to () (unclosed)"
-    (expect (gauche-with-temp-buffer "(a (b c) d"
-              (goto-char (point-min))
+    (expect (gauche-with-temp-buffer "|(a (b c) d"
+                (:point-at "|")
               (gauche-mode-toggle-paren-type)
               (buffer-string))
             :to-equal "[a (b c) d"))
   (it "toggles () to [] (unclosed)"
-    (expect (gauche-with-temp-buffer "(a (b c) d"
-              (goto-char 4)
+    (expect (gauche-with-temp-buffer "(a |(b c) d"
+                (:point-at "|")
               (gauche-mode-toggle-paren-type)
               (buffer-string))
             :to-equal "(a [b c] d"))
   (it "toggles [] to () (nested, unclosed)"
-    (expect (gauche-with-temp-buffer "(a (b c d)"
-              (goto-char 4)
+    (expect (gauche-with-temp-buffer "(a |(b c d)"
+                (:point-at "|")
               (gauche-mode-toggle-paren-type)
               (buffer-string))
             :to-equal "(a [b c d]"))

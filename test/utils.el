@@ -1,20 +1,27 @@
 ;;; -*- lexical-binding: t; -*-
+(require 'compat)
 (require 'assess)
 
 (setq-default indent-tabs-mode nil)
 
-(defmacro gauche-with-temp-buffer (contents &rest body)
-  (declare (indent 1))
-  `(save-window-excursion
-     (with-temp-buffer
-       (insert ,contents)
-       (pop-to-buffer (current-buffer))
-       (gauche-mode)
-       (font-lock-fontify-buffer)
-       ,@body)))
+(cl-defmacro gauche-with-temp-buffer (contents (&key point-at) &rest body)
+  (declare (indent 2))
+  (cl-once-only (point-at)
+    `(save-window-excursion
+       (with-temp-buffer
+         (insert ,contents)
+         (pop-to-buffer (current-buffer))
+         (gauche-mode)
+         (font-lock-fontify-buffer)
+         (goto-char (point-min))
+         (if ,point-at
+             (when (search-forward ,point-at nil t)
+               (delete-region (match-beginning 0) (match-end 0)))
+           (goto-char (point-max)))
+         ,@body))))
 
 (defun gauche-paredit-with-input-to-temp-buffer (macro)
-  (gauche-with-temp-buffer ""
+  (gauche-with-temp-buffer "" ()
     (enable-gauche-paredit-mode)
     (execute-kbd-macro macro)
     (buffer-string)))
