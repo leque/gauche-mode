@@ -353,3 +353,39 @@
               (buffer-string))
             :to-equal "(a [b c d]"))
   )
+
+(describe "font-lock"
+  (it "highlights a sexp comments"
+    (expect "#;(a b c) 1"
+            :to-be-font-locked-as
+            `((,(rx "#;") font-lock-comment-face)
+              (,(rx "(a b c") font-lock-comment-face)
+              (,(rx ")") font-lock-comment-delimiter-face)
+              (,(rx "1") nil)
+              )))
+  (it "highlights a regexp literal"
+    (expect "#/a/ #/a/i #/\\w/"
+            :to-be-font-locked-as
+            `((,(rx "#/a/") font-lock-string-face)
+              (,(rx "#/a/i") font-lock-string-face)
+              (,(rx "#/\\w/") font-lock-string-face)
+              )))
+  (it "highlights a char-set literal"
+    (expect "#[[:alpha:]] #[a-z] #[] #[\\w]"
+            :to-be-font-locked-as
+            `((,(rx "#[[:alpha:]]") font-lock-string-face)
+              (,(rx "#[a-z]") font-lock-string-face)
+              (,(rx "#[]") font-lock-string-face)
+              (,(rx "#[\\w]") font-lock-string-face)
+              )))
+  (it "highlights hex-escape in piped symbols"
+    (expect "|\\x3bb;|"
+            :to-be-font-locked-as
+            `((,(rx ";") nil))))
+  (it "interprets ambuiguous # as a part of the preceding datum"
+    (expect "#\\#//"
+            :to-be-font-locked-as
+            `((,(rx "#\\#") font-lock-string-face)
+              (,(rx "//") nil)
+              )))
+  )
