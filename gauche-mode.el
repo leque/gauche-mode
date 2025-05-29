@@ -351,7 +351,7 @@ With N, do it that many times."
   (funcall
    (syntax-propertize-rules
     ;; sexp comments
-    ((rx (submatch "#") ";")
+    ((rx (submatch-n 1 "#") ";")
      (1 (prog1 "< cn"
           (gauche-syntax-propertize-sexp-comment end))))
     ;; tokens ending with "#"
@@ -366,7 +366,7 @@ With N, do it that many times."
      ;; (character literal, ends with '#') over "#//" (regexp literal, begins with '#').
      )
     ;; quoted uninterned symbol prefix. #:|i|
-    ((rx (submatch "#:") "|")
+    ((rx (submatch-n 1 "#:") "|")
      (1 "'"))
     ;; quoted keyword symbol prefix. :|i|
     ((rx (seq symbol-start
@@ -375,36 +375,36 @@ With N, do it that many times."
               ))
      (1 "'"))
     ;; regexps
-    ((rx (submatch "#")
+    ((rx (submatch-n 1 "#")
          "/"
          (0+ (or (seq "\\" anything)
                  (not (any "/\\"))
                  ))
-         (or (seq "/" (submatch "i"))
-             (submatch "/")))
+         (or (seq "/" (submatch-n 2 "i"))
+             (submatch-n 3 "/")))
      (1 "| 14")
      (2 "|")
      (3 "|"))
     ;; SRFI-14 Character-set
-    ((rx (submatch "#")
+    ((rx (submatch-n 1 "#")
          "["
          (0+ (or (seq "\\" anything)
                  (seq "[:" (0+ lower) ":]")
                  (not (any "[]\\"))))
-         (submatch "]"))
+         (submatch-n 2 "]"))
      (1 "| 14")
      (2 "|"))
     ;; R6RS inline hex escape
-    ((rx "\\" (any "Xx") (1+ hex-digit) (submatch ";"))
+    ((rx "\\" (any "Xx") (1+ hex-digit) (submatch-n 1 ";"))
      (1 "_"))
     ;; R6RS bytevectors
-    ((rx "#" (submatch "vu8") "(")
+    ((rx "#" (submatch-n 1 "vu8") "(")
      (1 "'"))
     ;; R7RS bytevectors + SRFI-4 Homogeneous numeric vector datatypes
     ((rx "#"
-         (submatch
-          (or (seq (any "f") (or "16" "32" "64"))
-              (seq (any "su") (or "8" "16" "32" "64"))))
+         (submatch-n 1
+           (or (seq (any "f") (or "16" "32" "64"))
+               (seq (any "su") (or "8" "16" "32" "64"))))
          "(")
      (1 "'"))
     )
