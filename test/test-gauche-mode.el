@@ -395,3 +395,18 @@
               (,(rx "//") nil)
               )))
   )
+
+(describe "gauche-syntax-propertize"
+  (it "treats :|ab cd| as a single datum"
+    (expect (gauche-with-temp-buffer "_:|ab cd|"
+                (:point-at "_")
+              (forward-sexp)
+              (eobp))
+            :to-be-truthy))
+  (it "treats #:|ab cd| as a single datum"
+    (expect (gauche-with-temp-buffer "_#:|ab cd|"
+                (:point-at "_")
+              (forward-sexp)
+              (eobp))
+            :to-be-truthy))
+  )
