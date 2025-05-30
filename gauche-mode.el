@@ -388,7 +388,7 @@ With N, do it that many times."
     ((rx (submatch-n 1 "#")
          "["
          (0+ (or (seq "\\" anything)
-                 (seq "[:" (0+ lower) ":]")
+                 (seq "[:" (optional "^") (0+ (any "A-Za-z")) ":]")
                  (not (any "[]\\"))))
          (submatch-n 2 "]"))
      (1 "| 14")

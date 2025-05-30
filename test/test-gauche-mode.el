@@ -377,9 +377,12 @@
               (,(rx "#/\\w/") font-lock-string-face)
               )))
   (it "highlights a char-set literal"
-    (expect "#[[:alpha:]] #[a-z] #[] #[\\w]"
+    (expect "#[[:alpha:]] #[[:^alpha:]] #[[:ALPHA:]] #[[:^ALPHA:]] #[a-z] #[] #[\\w]"
             :to-be-font-locked-as
             `((,(rx "#[[:alpha:]]") font-lock-string-face)
+              (,(rx "#[[:^alpha:]]") font-lock-string-face)
+              (,(rx "#[[:ALPHA:]]") font-lock-string-face)
+              (,(rx "#[[:^ALPHA:]]") font-lock-string-face)
               (,(rx "#[a-z]") font-lock-string-face)
               (,(rx "#[]") font-lock-string-face)
               (,(rx "#[\\w]") font-lock-string-face)
@@ -405,6 +408,24 @@
             :to-be-truthy))
   (it "treats #:|ab cd| as a single datum"
     (expect (gauche-with-temp-buffer "_#:|ab cd|"
+                (:point-at "_")
+              (forward-sexp)
+              (eobp))
+            :to-be-truthy))
+  (it "treats #[[:alpha:]] as a single datum"
+    (expect (gauche-with-temp-buffer "_#[[:alpha:]]"
+                (:point-at "_")
+              (forward-sexp)
+              (eobp))
+            :to-be-truthy))
+  (it "treats #[[^:alpha:]] as a single datum"
+    (expect (gauche-with-temp-buffer "_#[[^:alpha:]]"
+                (:point-at "_")
+              (forward-sexp)
+              (eobp))
+            :to-be-truthy))
+  (it "treats #[[:ALPHA:]] as a single datum"
+    (expect (gauche-with-temp-buffer "_#[[:ALPHA:]]"
                 (:point-at "_")
               (forward-sexp)
               (eobp))
