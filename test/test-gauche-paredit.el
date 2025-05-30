@@ -82,7 +82,7 @@
     (gauche-paredit-test-key-sequence
      "(f #vu8())"
      (kbd "(f SPC #vu8(")))
-  (it "prevents inserting a space signed/unsigned vector prefix"
+  (it "prevents inserting a space before a signed/unsigned vector prefix"
     (cl-loop for n in '(8 16 32 64)
              for p in '(s u)
              do (gauche-paredit-test-key-sequence

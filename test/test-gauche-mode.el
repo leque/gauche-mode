@@ -190,7 +190,7 @@
   x)
 "
      :to-roundtrip-indentation-equal))
-  (it "indents lambda with required and keyword parameters (newline before each keyword parameters)"
+  (it "indents lambda with required and keyword parameters (newline before each keyword parameter)"
     (expect "\
 (lambda (x
          :key
@@ -199,7 +199,7 @@
   x)
 "
      :to-roundtrip-indentation-equal))
-  (it "indents lambda with required and keyword parameters (with comments in the middle of parameters)"
+  (it "indents lambda with required and keyword parameters (comments between parameters)"
     (expect "\
 (lambda (x
          :key ; comment
@@ -217,7 +217,7 @@
      :to-roundtrip-indentation-equal))
   ;; In the example below, `:rest` is currently aligned with `:key`,
   ;; but it might be better to align `:rest` with `:optional` instead.
-  (it "indents lambda with optional, keyword, and rest parameters (optional and keyword parameters are placed in the same line)"
+  (it "indents lambda with optional, keyword, and rest parameters (optional and keyword parameters on the same line)"
     (expect "\
 (lambda (:optional x :key y
                      :rest z)
@@ -278,7 +278,7 @@
   default)
 "
      :to-roundtrip-indentation-equal))
-  (it "indents define-method with optional parameters and qualifier"
+  (it "indents define-method with optional parameters and a qualifier"
     (expect "\
 (define-method dict-get :locked ((m <empty-dict>)
                                  :optional
@@ -286,7 +286,7 @@
   default)
 "
      :to-roundtrip-indentation-equal))
-  (it "indents define-method with optional parameters (+block comments)"
+  (it "indents define-method with optional parameters (+ block comments)"
     (expect "\
 (define-method #||# dict-get #||# :locked #||# ((m <empty-dict>)
                                                 :optional
@@ -346,7 +346,7 @@
               (gauche-mode-toggle-paren-type)
               (buffer-string))
             :to-equal "(a [b c] d"))
-  (it "toggles () to [] (inner, outer unclosed 2)"
+  (it "toggles () to [] (inner, outer unclosed #2)"
     (expect (gauche-with-temp-buffer "(a |(b c d)"
                 (:point-at "|")
               (gauche-mode-toggle-paren-type)
@@ -361,7 +361,7 @@
   )
 
 (describe "font-lock"
-  (it "highlights a sexp comments"
+  (it "highlights a sexp comment"
     (expect "#;(a b c) 1"
             :to-be-font-locked-as
             `((,(rx "#;") font-lock-comment-face)
@@ -384,11 +384,11 @@
               (,(rx "#[]") font-lock-string-face)
               (,(rx "#[\\w]") font-lock-string-face)
               )))
-  (it "highlights hex-escape in piped symbols"
+  (it "highlights a hex-escape in piped symbols"
     (expect "|\\x3bb;|"
             :to-be-font-locked-as
             `((,(rx ";") nil))))
-  (it "interprets ambuiguous # as a part of the preceding datum"
+  (it "interprets an ambuiguous # as a part of the preceding datum"
     (expect "#\\#//"
             :to-be-font-locked-as
             `((,(rx "#\\#") font-lock-string-face)
