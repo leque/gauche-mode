@@ -304,9 +304,8 @@ With N, do it that many times."
   (append
    `(,@(gauche-mode-keywords->font-lock-keyword gauche-mode-keywords)
      (,(rx "("
-           (submatch-n
-            1
-            (or "error" "errorf" "syntax-error" "syntax-errorf"))
+           (submatch-n 1
+             (or "error" "errorf" "syntax-error" "syntax-errorf"))
            symbol-end)
       1 font-lock-warning-face)
      (,(rx "#\\"
