@@ -18,14 +18,14 @@ An Emacs major mode for [Gauche Scheme Interpreter](http://practical-scheme.net/
 
 ## Configuration
 
-```
+```elisp
 (setq gauche-mode-info-language 'en) ; or 'ja
 ```
 
 ## Keybindings
 ### gauche-mode-toggle-debug-print `C-c C-d`
 
-```
+```scheme
 (list |(fact 10))
 ;; -->
 (list #?=(fact 10))
@@ -37,7 +37,7 @@ An Emacs major mode for [Gauche Scheme Interpreter](http://practical-scheme.net/
 
 ### gauche-mode-toggle-datum-comment `C-c ;`
 
-```
+```scheme
 (list |(foo 42) (bar))
 ;; -->
 (list #;(foo 42) (bar))
@@ -49,7 +49,7 @@ An Emacs major mode for [Gauche Scheme Interpreter](http://practical-scheme.net/
 
 ### gauche-mode-export-current-symbol `C-c M-x`
 
-```
+```scheme
 (define-module foo.bar
   (export))
 
@@ -63,7 +63,7 @@ An Emacs major mode for [Gauche Scheme Interpreter](http://practical-scheme.net/
 
 With a prefix argument, you can export symbols with renaming.
 
-```
+```scheme
 (define-module foo.bar
   (export))
 
@@ -79,7 +79,7 @@ With a prefix argument, you can export symbols with renaming.
 
 ### gauche-mode-macroexpand `C-c M-m`
 
-```
+```scheme
 (llist* 1 2 3)
 |
 ;; -| (cons 1 (lcons* 2 3))
@@ -87,7 +87,7 @@ With a prefix argument, you can export symbols with renaming.
 
 ### gauche-mode-macroexpand-1 `C-c C-m`
 
-```
+```scheme
 (llist* 1 2 3)
 |
 ;; -| (lcons* 1 2 3)
@@ -101,6 +101,6 @@ Gauche-aware paredit-mode.
 
 `M-x enable-gauche-paredit-mode` or put below in your configuration file.
 
-```
+```elisp
 (add-hook 'gauche-mode-hook #'enable-gauche-paredit-mode)
 ```
