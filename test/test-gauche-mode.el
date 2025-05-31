@@ -449,3 +449,135 @@
               (eobp))
             :to-be-truthy))
   )
+
+(describe "gauche-mode-export-current-symbol"
+  (it "exports the current symbol"
+    (expect (gauche-with-temp-buffer "\
+(define-module gauche-mode.test
+  (export)
+
+(define |one 1)
+"
+                (:point-at "|")
+              (execute-kbd-macro (kbd "M-x gauche-mode-export-current-symbol RET"))
+              (buffer-string))
+            :to-equal "\
+(define-module gauche-mode.test
+  (export one)
+
+(define one 1)
+"
+            ))
+  (it "exports the current symbol (line comment inside the export list)"
+    (expect (gauche-with-temp-buffer "\
+(define-module gauche-mode.test
+  (export one ; comment
+          )
+
+(define one 1)
+(define |two 2)
+"
+                (:point-at "|")
+              (execute-kbd-macro (kbd "M-x gauche-mode-export-current-symbol RET"))
+              (buffer-string))
+            :to-equal "\
+(define-module gauche-mode.test
+  (export one ; comment
+          two)
+
+(define one 1)
+(define two 2)
+"
+            ))
+  (it "exports the current symbol (block comment inside the export list)"
+    (expect (gauche-with-temp-buffer "\
+(define-module gauche-mode.test
+  (export one #|comment|#)
+
+(define one 1)
+(define _two 2)
+"
+                (:point-at "_")
+              (execute-kbd-macro (kbd "M-x gauche-mode-export-current-symbol RET"))
+              (buffer-string))
+            :to-equal "\
+(define-module gauche-mode.test
+  (export one #|comment|# two)
+
+(define one 1)
+(define two 2)
+"
+            ))
+  (it "exports the current symbol (sexp comment inside the export list)"
+    (expect (gauche-with-temp-buffer "\
+(define-module gauche-mode.test
+  (export one #;two)
+
+(define one 1)
+(define _two 2)
+"
+                (:point-at "_")
+              (execute-kbd-macro (kbd "M-x gauche-mode-export-current-symbol RET"))
+              (buffer-string))
+            :to-equal "\
+(define-module gauche-mode.test
+  (export one #;two two)
+
+(define one 1)
+(define two 2)
+"
+            ))
+  (it "exports the current symbol with renaming"
+    (expect (gauche-with-temp-buffer "\
+(define-module gauche-mode.test
+  (export)
+
+(define |one 1)
+"
+                (:point-at "|")
+              (execute-kbd-macro (kbd "C-u M-x gauche-mode-export-current-symbol RET uno RET"))
+              (buffer-string))
+            :to-equal "\
+(define-module gauche-mode.test
+  (export (rename one uno))
+
+(define one 1)
+"
+            ))
+  (it "does not modify the export list if the current symbol is already exported"
+    (expect (gauche-with-temp-buffer "\
+(define-module gauche-mode.test
+  (export one)
+
+(define |one 1)
+"
+                (:point-at "|")
+              (execute-kbd-macro (kbd "M-x gauche-mode-export-current-symbol RET"))
+              (buffer-string))
+            :to-equal "\
+(define-module gauche-mode.test
+  (export one)
+
+(define one 1)
+"
+            ))
+  (it "does not modify the export list if the current symbol is already exported (with renaming)"
+    (expect (gauche-with-temp-buffer "\
+(define-module gauche-mode.test
+  (export uno)
+
+(define |one 1)
+(define uno one)
+"
+                (:point-at "|")
+              (execute-kbd-macro (kbd "C-u M-x gauche-mode-export-current-symbol RET uno RET"))
+              (buffer-string))
+            :to-equal "\
+(define-module gauche-mode.test
+  (export uno)
+
+(define one 1)
+(define uno one)
+"
+            ))
+  )
