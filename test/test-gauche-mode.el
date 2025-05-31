@@ -387,6 +387,24 @@
               (,(rx "#[]") font-lock-string-face)
               (,(rx "#[\\w]") font-lock-string-face)
               )))
+  (it "highlights a boolean literal"
+    (expect "#t #f #True #False #TRUE #FALSE"
+            :to-be-font-locked-as
+            `(
+              (,(rx "#true") font-lock-constant-face)
+              (,(rx "#false") font-lock-constant-face)
+              (,(rx "#True") font-lock-constant-face)
+              (,(rx "#False") font-lock-constant-face)
+              (,(rx "#TRUE") font-lock-constant-face)
+              (,(rx "#FALSE") font-lock-constant-face)
+              )))
+  (it "does not highlight a non-boolean lookalike"
+    (expect "#truer #falsetto"
+            :to-be-font-locked-as
+            `(
+              (,(rx "#truer") nil)
+              (,(rx "#falsetto") nil)
+              )))
   (it "highlights a hex-escape in piped symbols"
     (expect "|\\x3bb;|"
             :to-be-font-locked-as

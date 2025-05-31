@@ -316,12 +316,13 @@ With N, do it that many times."
            (or "<>" "<...>")
            symbol-end)
       0 font-lock-builtin-face t)
-     (,(rx "#"
-           (or (seq (any "Tt")
-                    (opt (any "Rr") (any "Uu") (any "Ee")))
-               (seq (any "Ff")
-                    (opt (any "Aa") (any "Ll") (any "Ss") (any "Ee"))))
-           symbol-end)
+     (,(rx-let ((uncase (s) (eval
+                             `(seq ,@(cl-loop for c across s
+                                              collect `(any ,(upcase c) ,(downcase c)))))))
+         (rx "#"
+             (or (seq (uncase "t") (optional (uncase "rue")))
+                 (seq (uncase "f") (optional (uncase "alse"))))
+             symbol-end))
       0 font-lock-constant-face)
      (,(rx "#!" (1+ word))
       0 font-lock-comment-face)
