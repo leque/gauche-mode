@@ -193,10 +193,10 @@ With N, do it that many times."
                               (if (numberp form-spec)
                                   (forward-sexp form-spec)
                                 (funcall form-spec))
-                              (and (< (point) indent-point)
-                                   (progn
-                                     (forward-sexp)
-                                     (< indent-point (point)))))
+                              (let ((sp (point)))
+                                (< sp indent-point (progn
+                                                     (forward-sexp)
+                                                     (point)))))
                           (scan-error t))))))
               (key-pos
                ;; find the position of the last lambda-formals keyword before indent-point
